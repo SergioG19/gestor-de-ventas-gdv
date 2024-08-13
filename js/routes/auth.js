@@ -29,7 +29,7 @@ router.post('/register', async (req, res) => {
 
         jwt.sign(
             payload,
-            'secret', // Change to a secure key for production
+            'secret', 
             { expiresIn: 360000 },
             (err, token) => {
                 if (err) throw err;
@@ -37,7 +37,7 @@ router.post('/register', async (req, res) => {
             }
         );
     } catch (err) {
-        console.error(err.message);
+        console.error('Error during user registration:', err.message);
         res.status(500).send('Server error');
     }
 });
@@ -65,7 +65,7 @@ router.post('/login', async (req, res) => {
 
         jwt.sign(
             payload,
-            'secret', // Change to a secure key for production
+            'secret', 
             { expiresIn: 360000 },
             (err, token) => {
                 if (err) throw err;
@@ -73,7 +73,7 @@ router.post('/login', async (req, res) => {
             }
         );
     } catch (err) {
-        console.error(err.message);
+        console.error('Error during user login:', err.message);
         res.status(500).send('Server error');
     }
 });
