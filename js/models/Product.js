@@ -13,6 +13,14 @@ const ProductSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    originalPrice: {
+        type: Number,
+        required: true
+    },
+    image: {
+        type: String,
+        required: true
+    },
     vendor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

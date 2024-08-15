@@ -5,51 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Página de Inicio - Gestor de Ventas</title>
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Asegurar que el cuerpo ocupe toda la altura de la ventana */
+    html, body {
+      height: 100%;
+    }
+    /* Asegurar que el contenedor principal ocupe el espacio restante */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+    /* Asegurar que el contenido principal ocupe el espacio restante */
+    main {
+      flex: 1;
+    }
+    /* Centrar la paginación */
+    #pagination {
+      justify-content: center;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-  <!-- Header -->
-  <header class="bg-blue-600 text-white p-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <h1 class="text-2xl font-bold">Gestor de Ventas</h1>
-      <nav>
-        <a href="login.html" class="px-4">Iniciar Sesión</a>
-        <a href="register.html" class="px-4">Registrarse</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main class="container mx-auto py-8">
-    <!-- Barra de Búsqueda -->
-    <div class="mb-6">
-      <input type="text" id="searchBar" placeholder="Buscar productos..." class="w-full px-4 py-2 border rounded-md">
-    </div>
-
-    <!-- Opciones de Filtrado -->
-    <div class="mb-6 flex justify-between items-center">
-      <div>
-        <label for="filter" class="mr-2">Filtrar por:</label>
-        <select id="filter" class="px-4 py-2 border rounded-md">
-          <option value="all">Todos</option>
-          <option value="category1">Categoría 1</option>
-          <option value="category2">Categoría 2</option>
-        </select>
+  <div class="main-container">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white p-4">
+      <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Gestor de Ventas</h1>
+        <nav>
+          <a href="login.html" class="px-4">Iniciar Sesión</a>
+          <a href="register.html" class="px-4">Registrarse</a>
+        </nav>
       </div>
-    </div>
+    </header>
 
-    <!-- Listado de Productos -->
-    <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Productos serán insertados aquí mediante JavaScript -->
-    </div>
-  </main>
+    <!-- Main Content -->
+    <main class="container mx-auto py-8">
+      <!-- Barra de Búsqueda -->
+      <div class="mb-6">
+        <input type="text" id="searchBar" placeholder="Buscar productos..." class="w-full px-4 py-2 border rounded-md">
+      </div>
 
-  <!-- Footer -->
-  <footer class="bg-gray-800 text-white p-4 mt-8">
-    <div class="container mx-auto text-center">
-      <p>&copy; 2024 Gestor de Ventas. Todos los derechos reservados.</p>
-    </div>
-  </footer>
+      <!-- Opciones de Filtrado -->
+      <div class="mb-6 flex justify-between items-center">
+        <div>
+          <label for="filter" class="mr-2">Filtrar por:</label>
+          <select id="filter" class="px-4 py-2 border rounded-md">
+            <option value="all">Todos</option>
+            <option value="price_asc">Menor a Mayor Precio</option>
+            <option value="price_desc">Mayor a Menor Precio</option>
+            <option value="category_appliances">Electrodomésticos</option>
+            <option value="category_tech">Tecnología</option>
+            <option value="category_supermarket">Supermercado</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Listado de Productos -->
+      <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <!-- Productos serán insertados aquí mediante JavaScript -->
+      </div>
+
+      <!-- Mensaje de No Resultados -->
+      <div id="noResults" class="hidden text-center text-gray-500">No se encontraron productos.</div>
+
+      <!-- Paginación -->
+      <div id="pagination" class="flex justify-center items-center mt-6">
+        <button id="prevPage" class="px-4 py-2 border rounded-md mx-2">Anterior</button>
+        <div id="pageNumbers" class="flex">
+          <!-- Números de página serán insertados aquí mediante JavaScript -->
+        </div>
+        <button id="nextPage" class="px-4 py-2 border rounded-md mx-2">Siguiente</button>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 mt-8">
+      <div class="container mx-auto text-center">
+        <p>&copy; 2024 Gestor de Ventas. Todos los derechos reservados.</p>
+      </div>
+    </footer>
+  </div>
 
   <script src="js/app.js"></script>
 </body>

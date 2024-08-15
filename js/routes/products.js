@@ -25,7 +25,7 @@ router.post('/', auth, isVendor, async (req, res) => {
 });
 
 // Ruta para obtener todos los productos
-router.get('/', auth, async (req, res) => {
+router.get('/', async (req, res) => {  // Nota: Eliminé el middleware `auth` para permitir el acceso público a los productos
     try {
         const products = await Product.find().populate('vendor', 'name email');
         res.json(products);
