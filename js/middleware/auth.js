@@ -21,7 +21,7 @@ module.exports = function(req, res, next) {
 module.exports.isVendor = async function(req, res, next) {
     try {
         const user = await User.findById(req.user.id);
-        if (user.role !== 'vendor') {
+        if (user.role !== 'seller') {
             return res.status(403).json({ msg: 'Access denied: Vendors only' });
         }
         next();

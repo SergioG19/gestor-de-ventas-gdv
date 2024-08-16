@@ -14,12 +14,15 @@ const ProductSchema = new mongoose.Schema({
         required: true
     },
     originalPrice: {
-        type: Number,
-        required: true
+        type: Number
     },
     image: {
+        type: String
+    },
+    category: {
         type: String,
-        required: true
+        required: true,
+        enum: ['Electrodomésticos', 'Tecnología', 'Supermercado']
     },
     vendor: {
         type: mongoose.Schema.Types.ObjectId,

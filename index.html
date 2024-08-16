@@ -6,34 +6,16 @@
   <title>Página de Inicio - Gestor de Ventas</title>
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* Asegurar que el cuerpo ocupe toda la altura de la ventana */
-    html, body {
-      height: 100%;
-    }
-    /* Asegurar que el contenedor principal ocupe el espacio restante */
-    .main-container {
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-    }
-    /* Asegurar que el contenido principal ocupe el espacio restante */
-    main {
-      flex: 1;
-    }
-    /* Centrar la paginación */
-    #pagination {
-      justify-content: center;
-    }
+    /* Estilos adicionales */
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
-
   <div class="main-container">
     <!-- Header -->
     <header class="bg-blue-600 text-white p-4">
       <div class="container mx-auto flex justify-between items-center">
         <h1 class="text-2xl font-bold">Gestor de Ventas</h1>
-        <nav>
+        <nav id="userNav">
           <a href="login.html" class="px-4">Iniciar Sesión</a>
           <a href="register.html" class="px-4">Registrarse</a>
         </nav>

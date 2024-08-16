@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Agregar estilos adicionales si es necesario */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+@media (max-width: 640px) {
+  .login-container, .register-container {
+    padding: 1.5rem;
+  }
+}

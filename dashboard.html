@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Gestor de Ventas</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      min-height: 100vh;
+      background-color: #f3f4f6;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #1f2937;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .sidebar h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .sidebar a {
+      color: #fff;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: block;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+    .sidebar a:hover {
+      background-color: #374151;
+    }
+    .content {
+      flex: 1;
+      padding: 20px;
+    }
+    .header {
+      background-color: #3b82f6;
+      padding: 20px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+    }
+    .header nav a {
+      color: #fff;
+      margin-left: 20px;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .header nav a:hover {
+      color: #d1d5db;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .stat-item {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .stat-item h3 {
+      font-size: 1.25rem;
+      margin-bottom: 10px;
+      color: #3b82f6;
+    }
+    .stat-item p {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1f2937;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table th, table td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+    table th {
+      background-color: #f3f4f6;
+      font-weight: bold;
+    }
+    .table-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .table-actions button {
+      padding: 5px 10px;
+      background-color: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .table-actions button:hover {
+      background-color: #2563eb;
+    }
+    .popup-form {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: none;
+    }
+    .popup-form.active {
+      display: block;
+    }
+    .popup-form h2 {
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+      color: #1f2937;
+    }
+    .popup-form .form-control {
+      margin-bottom: 15px;
+    }
+    .popup-form .form-control label {
+      display: block;
+      margin-bottom: 5px;
+      color: #4b5563;
+    }
+    .popup-form .form-control input, .popup-form .form-control textarea, .popup-form .form-control select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+    }
+    .popup-form .form-control textarea {
+      resize: none;
+      height: 100px;
+    }
+    .popup-form .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .popup-form .form-actions button {
+      padding: 10px 20px;
+      background-color: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .popup-form .form-actions button:hover {
+      background-color: #2563eb;
+    }
+    .popup-form .form-actions .cancel-btn {
+      background-color: #d1d5db;
+      color: #374151;
+    }
+    .popup-form .form-actions .cancel-btn:hover {
+      background-color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <!-- Barra lateral -->
+  <aside class="sidebar">
+    <h2>Gestor de Ventas</h2>
+    <a href="#" id="menuGeneral">General</a>
+    <a href="#" id="menuInventario">Inventario</a>
+    <a href="#" id="menuConfig">Configuración de Usuario</a>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="content">
+    <!-- Header del Dashboard -->
+    <header class="header">
+      <h1 id="userGreeting">Bienvenido, Usuario</h1>
+      <nav>
+        <a href="index.html">Volver al Inicio</a>
+        <a href="#" id="logoutBtn">Cerrar Sesión</a>
+      </nav>
+    </header>
+
+    <!-- Aquí irá el contenido dinámico según el menú seleccionado -->
+    <section id="dashboardContent">
+      <p>Selecciona una opción del menú para comenzar.</p>
+    </section>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
