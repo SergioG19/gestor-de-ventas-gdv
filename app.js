@@ -18,5 +18,3 @@ app.use('/api/stats', require('./js/routes/stats'));
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
-
-

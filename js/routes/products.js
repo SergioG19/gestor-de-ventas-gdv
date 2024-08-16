@@ -19,7 +19,7 @@ const upload = multer({ storage: storage });
 
 // Crear un producto
 router.post('/', auth, upload.single('image'), async (req, res) => {
-  const { name, offer, price, description, category } = req.body;
+  const { name, price, description, category } = req.body;
   const vendor = req.user.id;
 
   try {
@@ -29,7 +29,6 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
 
     const newProduct = new Product({
       name,
-      offer,
       price,
       description,
       category,
@@ -45,6 +44,15 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
   }
 });
 
-// (Las otras rutas de `GET`, `PUT` y `DELETE` también pueden estar aquí)
+// Ruta para obtener todos los productos
+router.get('/', auth, async (req, res) => {
+    try {
+        const products = await Product.find().populate('vendor', 'name email');
+        res.json(products);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
 
 module.exports = router;
