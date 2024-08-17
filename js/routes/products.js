@@ -81,24 +81,24 @@ router.put('/:id', auth, isSeller, async (req, res) => {
 
 // Ruta para eliminar un producto
 router.delete('/:id', auth, isSeller, async (req, res) => {
-    try {
-        let product = await Product.findById(req.params.id);
-        
-        if (!product) {
-            return res.status(404).json({ msg: 'Producto no encontrado' });
-        }
+  try {
+      let product = await Product.findById(req.params.id);
+      
+      if (!product) {
+          return res.status(404).json({ msg: 'Producto no encontrado' });
+      }
 
-        // Verificar que el producto pertenece al vendedor que intenta eliminarlo
-        if (product.seller.toString() !== req.user.id) {
-            return res.status(401).json({ msg: 'No autorizado para eliminar este producto' });
-        }
+      // Verificar que el producto pertenece al vendedor que intenta eliminarlo
+      if (product.seller.toString() !== req.user.id) {
+          return res.status(401).json({ msg: 'No autorizado para eliminar este producto' });
+      }
 
-        await product.remove();
-        res.json({ msg: 'Producto eliminado' });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
+      await Product.deleteOne({ _id: req.params.id });
+      res.json({ msg: 'Producto eliminado' });
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+  }
 });
 
 module.exports = router;

@@ -116,11 +116,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    const overlay = document.createElement('div');
+    overlay.classList.add('overlay');
+    document.body.appendChild(overlay);
+
     const formContainer = document.createElement('div');
     formContainer.id = 'productForm';
     formContainer.classList.add('popup-form', 'active');
     formContainer.innerHTML = `
-      <div class="overlay"></div>
       <div class="form-container">
         <h2 class="text-xl font-bold mb-4">${product._id ? 'Editar Producto' : 'Agregar Producto'}</h2>
         <form id="addProductForm" class="space-y-4">
@@ -159,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addProductForm').addEventListener('submit', (e) => handleProductFormSubmit(e, product._id));
     document.querySelector('.cancel-btn').addEventListener('click', () => {
       formContainer.remove();
+      overlay.remove(); // Eliminar overlay al cerrar el formulario
       document.body.classList.remove('form-open');
     });
   }
@@ -190,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         fetchProducts();  // Recargar productos después de agregar/editar uno nuevo
         document.getElementById('productForm').remove();  // Cerrar formulario
+        document.querySelector('.overlay').remove(); // Eliminar overlay al cerrar el formulario
         document.body.classList.remove('form-open'); // Quitar opacidad del fondo
       } else {
         const errorResponse = await response.json();
