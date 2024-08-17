@@ -22,7 +22,7 @@ const ProductSchema = new mongoose.Schema({
         required: true,
         enum: ['Electrodomésticos', 'Tecnología', 'Supermercado']
     },
-    seller: {  // Cambiado de 'vendor' a 'seller'
+    seller: {  
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true

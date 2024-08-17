@@ -55,34 +55,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Función para obtener estadísticas del vendedor autenticado
-async function fetchStats() {
-  try {
-    const response = await fetch('http://localhost:3000/api/stats', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-auth-token': localStorage.getItem('token')
+  async function fetchStats() {
+    try {
+      const response = await fetch('http://localhost:3000/api/stats', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': localStorage.getItem('token')
+        }
+      });
+      if (response.ok) {
+        const stats = await response.json();
+        document.getElementById('totalProducts').textContent = stats.totalProducts;
+        document.getElementById('totalSold').textContent = stats.totalSold;
+        document.getElementById('totalBuyers').textContent = stats.totalBuyers;
+      } else {
+        console.error('Error al obtener estadísticas:', response.status);
       }
-    });
-    if (response.ok) {
-      const stats = await response.json();
-      document.getElementById('totalProducts').textContent = stats.totalProducts;
-      document.getElementById('totalSold').textContent = stats.totalSold;
-      document.getElementById('totalBuyers').textContent = stats.totalBuyers;
-    } else {
-      console.error('Error al obtener estadísticas:', response.status);
+    } catch (error) {
+      console.error('Error al obtener estadísticas:', error);
     }
-  } catch (error) {
-    console.error('Error al obtener estadísticas:', error);
   }
-}
-
 
   // Función para cargar el contenido del menú Inventario
   function loadInventarioContent() {
     dashboardContent.innerHTML = `
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Inventario de Productos</h2>
-      <button id="addProductBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mb-4">Agregar Producto</button>
+      <button id="addProductBtn" class="bg-black-500 hover:bg-green-600 text-black px-4 py-2 rounded mb-4">Agregar Producto</button>
       <div class="table-container">
         <table>
           <thead>
@@ -153,19 +152,21 @@ async function fetchStats() {
   async function handleProductFormSubmit(e) {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('name', document.getElementById('productName').value);
-    formData.append('price', parseFloat(document.getElementById('productPrice').value));
-    formData.append('description', document.getElementById('productDescription').value);
-    formData.append('category', document.getElementById('productCategory').value);
+    const formData = {
+      name: document.getElementById('productName').value,
+      price: parseFloat(document.getElementById('productPrice').value),
+      description: document.getElementById('productDescription').value,
+      category: document.getElementById('productCategory').value
+    };
 
     try {
       const response = await fetch('http://localhost:3000/api/products', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'x-auth-token': localStorage.getItem('token')
         },
-        body: formData
+        body: JSON.stringify(formData)
       });
 
       if (response.ok) {
@@ -194,8 +195,7 @@ async function fetchStats() {
       });
       if (response.ok) {
         const products = await response.json();
-        const vendorProducts = products.filter(product => product.seller === user._id); // Filtrar por ID de usuario actual
-        renderProducts(vendorProducts);
+        renderProducts(products);
       } else {
         console.error('Error al obtener productos:', response.status);
       }
