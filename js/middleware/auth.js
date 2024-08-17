@@ -9,7 +9,7 @@ module.exports = function(req, res, next) {
     }
 
     try {
-        const decoded = jwt.verify(token, 'secret'); // Cambiar a una clave segura en producción
+        const decoded = jwt.verify(token, 'secret'); // Asegúrate de usar una clave segura en producción
         req.user = decoded.user;
         next();
     } catch (err) {
@@ -17,12 +17,12 @@ module.exports = function(req, res, next) {
     }
 };
 
-// Middleware para verificar el rol de vendedor
-module.exports.isVendor = async function(req, res, next) {
+// Middleware para verificar el rol de seller
+module.exports.isSeller = async function(req, res, next) {
     try {
         const user = await User.findById(req.user.id);
         if (user.role !== 'seller') {
-            return res.status(403).json({ msg: 'Access denied: Vendors only' });
+            return res.status(403).json({ msg: 'Access denied: Sellers only' });
         }
         next();
     } catch (err) {

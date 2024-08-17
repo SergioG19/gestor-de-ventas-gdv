@@ -1,54 +1,100 @@
+// Archivo: routes/products.js
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
 const auth = require('../middleware/auth');
-const multer = require('multer');
-const path = require('path');
+const { isSeller } = require('../middleware/auth');
+const Product = require('../models/Product');
 
-// Configuración de multer para manejar la subida de imágenes
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
+// Ruta para añadir un producto
+router.post('/', auth, isSeller, async (req, res) => {
+    const { name, description, price, category } = req.body;
+    
+    try {
+        const newProduct = new Product({
+          name,
+          price,
+          description,
+          category,
+          seller: req.user.id  // Usar el ID del usuario autenticado como el 'seller'
+        });
 
-const upload = multer({ storage: storage });
-
-// Crear un producto
-router.post('/', auth, upload.single('image'), async (req, res) => {
-  const { name, price, description, category } = req.body;
-  const vendor = req.user.id;
-
-  try {
-    if (!name || !description || !price || !category) {
-      return res.status(400).json({ errors: [{ msg: 'Por favor completa todos los campos requeridos' }] });
+        const product = await newProduct.save();
+        res.json(product);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
     }
-
-    const newProduct = new Product({
-      name,
-      price,
-      description,
-      category,
-      vendor,
-      image: req.file ? req.file.path : '' // Guarda la ruta de la imagen si se ha subido una
-    });
-
-    const product = await newProduct.save();
-    res.json(product);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ errors: [{ msg: 'Server error' }] });
-  }
 });
 
 // Ruta para obtener todos los productos
+router.get('/all', async (req, res) => {
+  try {
+      const products = await Product.find().populate('seller', 'name email');
+      res.json(products);
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+  }
+});
+
+// Ruta para obtener los productos del vendedor autenticado
 router.get('/', auth, async (req, res) => {
+  try {
+      const products = await Product.find({ seller: req.user.id }).populate('seller', 'name email');
+      res.json(products);
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+  }
+});
+
+
+// Ruta para editar un producto
+router.put('/:id', auth, isSeller, async (req, res) => {
+    const { name, description, price, category } = req.body;
+
     try {
-        const products = await Product.find().populate('vendor', 'name email');
-        res.json(products);
+        let product = await Product.findById(req.params.id);
+        
+        if (!product) {
+            return res.status(404).json({ msg: 'Producto no encontrado' });
+        }
+
+        // Verificar que el producto pertenece al vendedor que intenta editarlo
+        if (product.seller.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'No autorizado para editar este producto' });
+        }
+
+        // Actualizar los campos del producto
+        product.name = name || product.name;
+        product.description = description || product.description;
+        product.price = price || product.price;
+        product.category = category || product.category;
+
+        product = await product.save();
+        res.json(product);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Ruta para eliminar un producto
+router.delete('/:id', auth, isSeller, async (req, res) => {
+    try {
+        let product = await Product.findById(req.params.id);
+        
+        if (!product) {
+            return res.status(404).json({ msg: 'Producto no encontrado' });
+        }
+
+        // Verificar que el producto pertenece al vendedor que intenta eliminarlo
+        if (product.seller.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'No autorizado para eliminar este producto' });
+        }
+
+        await product.remove();
+        res.json({ msg: 'Producto eliminado' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

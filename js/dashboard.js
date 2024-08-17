@@ -7,11 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuConfig = document.getElementById('menuConfig');
   const dashboardContent = document.getElementById('dashboardContent');
 
-  if (user) {
-    userGreeting.textContent = `Bienvenido, ${user.name}`;
-  } else {
+  if (!user) {
     window.location.href = 'login.html';
+    return;
   }
+
+  userGreeting.textContent = `Bienvenido, ${user.name}`;
 
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('token');
@@ -53,23 +54,29 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchStats();
   }
 
-  async function fetchStats() {
-    try {
-      const response = await fetch('http://localhost:3000/api/stats', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': localStorage.getItem('token')
-        }
-      });
+  // Función para obtener estadísticas del vendedor autenticado
+async function fetchStats() {
+  try {
+    const response = await fetch('http://localhost:3000/api/stats', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': localStorage.getItem('token')
+      }
+    });
+    if (response.ok) {
       const stats = await response.json();
       document.getElementById('totalProducts').textContent = stats.totalProducts;
       document.getElementById('totalSold').textContent = stats.totalSold;
       document.getElementById('totalBuyers').textContent = stats.totalBuyers;
-    } catch (error) {
-      console.error('Error al obtener estadísticas:', error);
+    } else {
+      console.error('Error al obtener estadísticas:', response.status);
     }
+  } catch (error) {
+    console.error('Error al obtener estadísticas:', error);
   }
+}
+
 
   // Función para cargar el contenido del menú Inventario
   function loadInventarioContent() {
@@ -81,11 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>En Oferta</th>
               <th>Precio</th>
               <th>Descripción</th>
               <th>Categoría</th>
-              <th>Subido Por</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -96,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <p id="noProductsMessage" class="text-gray-600 mt-4 hidden">Todavía no se ha agregado ningún producto.</p>
     `;
-    fetchProducts(); // Cargar productos desde la base de datos
+    fetchProducts(); // Cargar productos del vendedor autenticado desde la base de datos
 
     document.getElementById('addProductBtn').addEventListener('click', () => {
       showProductForm();
@@ -114,13 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="text" id="productName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
           </div>
           <div class="form-control">
-            <label for="productOffer" class="block text-sm font-medium text-gray-700">¿En Oferta?</label>
-            <select id="productOffer" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-              <option value="false">No</option>
-              <option value="true">Sí</option>
-            </select>
-          </div>
-          <div class="form-control">
             <label for="productPrice" class="block text-sm font-medium text-gray-700">Precio</label>
             <input type="number" id="productPrice" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
           </div>
@@ -136,10 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
               <option value="Tecnología">Tecnología</option>
               <option value="Supermercado">Supermercado</option>
             </select>
-          </div>
-          <div class="form-control">
-            <label for="productImage" class="block text-sm font-medium text-gray-700">Imagen del Producto</label>
-            <input type="file" id="productImage" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
           </div>
           <div class="form-actions flex justify-end space-x-4">
             <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Guardar</button>
@@ -161,44 +155,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formData = new FormData();
     formData.append('name', document.getElementById('productName').value);
-    formData.append('offer', document.getElementById('productOffer').value === 'true');
     formData.append('price', parseFloat(document.getElementById('productPrice').value));
     formData.append('description', document.getElementById('productDescription').value);
     formData.append('category', document.getElementById('productCategory').value);
-    
-    const productImage = document.getElementById('productImage').files;
-    if (productImage.length > 0) {
-        formData.append('image', productImage[0]);
-    }
-    
-    formData.append('vendor', user._id);
 
     try {
-        const response = await fetch('http://localhost:3000/api/products', {
-            method: 'POST',
-            headers: {
-                'x-auth-token': localStorage.getItem('token')
-            },
-            body: formData
-        });
+      const response = await fetch('http://localhost:3000/api/products', {
+        method: 'POST',
+        headers: {
+          'x-auth-token': localStorage.getItem('token')
+        },
+        body: formData
+      });
 
-        if (response.ok) {
-            fetchProducts();  // Recargar productos después de agregar uno nuevo
-            document.getElementById('productForm').remove();  // Cerrar formulario
-        } else {
-            const errorResponse = await response.json();
-            console.error('Error al agregar producto:', errorResponse);
-            alert('Error al agregar producto: ' + (errorResponse.errors[0]?.msg || 'Error desconocido'));
-        }
+      if (response.ok) {
+        fetchProducts();  // Recargar productos después de agregar uno nuevo
+        document.getElementById('productForm').remove();  // Cerrar formulario
+      } else {
+        const errorResponse = await response.json();
+        console.error('Error al agregar producto:', errorResponse);
+        alert('Error al agregar producto: ' + (errorResponse.errors[0]?.msg || 'Error desconocido'));
+      }
     } catch (error) {
-        console.error('Error al agregar producto:', error);
-        alert('Error al agregar producto: ' + error.message);
+      console.error('Error al agregar producto:', error);
+      alert('Error al agregar producto: ' + error.message);
     }
-}
+  }
 
-  
-
-  // Función para obtener y filtrar productos por usuario
+  // Función para obtener y filtrar productos por usuario (vendedor autenticado)
   async function fetchProducts() {
     try {
       const response = await fetch('http://localhost:3000/api/products', {
@@ -208,9 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
           'x-auth-token': localStorage.getItem('token')
         }
       });
-      const products = await response.json();
-      const vendorProducts = products.filter(product => product.vendor === user._id); // Filtrar por ID de usuario actual
-      renderProducts(vendorProducts);
+      if (response.ok) {
+        const products = await response.json();
+        const vendorProducts = products.filter(product => product.seller === user._id); // Filtrar por ID de usuario actual
+        renderProducts(vendorProducts);
+      } else {
+        console.error('Error al obtener productos:', response.status);
+      }
     } catch (error) {
       console.error('Error al obtener productos:', error);
     }
@@ -231,11 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tr.innerHTML = `
           <td>${product.name}</td>
-          <td>${product.offer ? 'Sí' : 'No'}</td>
           <td>$${product.price}</td>
           <td>${product.description}</td>
           <td>${product.category}</td>
-          <td>${user.name}</td>
           <td class="table-actions">
             <button class="edit-btn bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">Editar</button>
             <button class="delete-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>

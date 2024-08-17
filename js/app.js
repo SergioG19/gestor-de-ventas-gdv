@@ -13,17 +13,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const productsPerPage = 4;
 
   // Función para mostrar productos
-  function displayProducts(products) {
+  function renderProducts(productsToRender) {
     productList.innerHTML = '';
-    if (products.length === 0) {
+    if (productsToRender.length === 0) {
       noResults.classList.remove('hidden');
       noResults.style.display = 'block';
     } else {
       noResults.classList.add('hidden');
       noResults.style.display = 'none';
+
       const start = (currentPage - 1) * productsPerPage;
       const end = start + productsPerPage;
-      const paginatedProducts = products.slice(start, end);
+      const paginatedProducts = productsToRender.slice(start, end);
+
       paginatedProducts.forEach(product => {
         const productCard = document.createElement('div');
         productCard.classList.add('bg-white', 'p-4', 'rounded-md', 'shadow-md', 'border');
@@ -34,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <p class="text-gray-900 font-bold mb-2">$${product.price}</p>
           <p class="text-green-600">Envío gratis</p>
           <p class="text-gray-700 mb-2">${product.description}</p>
-          <p class="text-gray-600 text-sm">Vendedor: ${product.vendor.name}</p>
+          <p class="text-gray-600 text-sm">Vendedor: ${product.seller.name}</p>
         `;
 
         productList.appendChild(productCard);
@@ -52,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       pageNumber.innerText = i;
       pageNumber.addEventListener('click', () => {
         currentPage = i;
-        displayProducts(filteredProducts);
+        renderProducts(filteredProducts);
         updatePageNumbers();
       });
       pageNumbers.appendChild(pageNumber);
@@ -71,17 +73,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Obtener productos desde el backend
-  async function fetchProducts() {
+  // Obtener todos los productos para la página de inicio
+  async function fetchAllProducts() {
     try {
-      const response = await fetch('http://localhost:3000/api/products');
-      products = await response.json();
-      filteredProducts = products;
-      displayProducts(filteredProducts);
-      displayPagination(filteredProducts.length);
-      updatePageNumbers();
+      const response = await fetch('http://localhost:3000/api/products/all', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        products = await response.json();
+        filteredProducts = products;
+        renderProducts(filteredProducts);
+        displayPagination(filteredProducts.length);
+        updatePageNumbers();
+      } else {
+        console.error('Error fetching products:', response.status);
+        noResults.classList.remove('hidden');
+        noResults.style.display = 'block';
+      }
     } catch (error) {
       console.error('Error fetching products:', error);
+      noResults.classList.remove('hidden');
+      noResults.style.display = 'block';
+    }
+  }
+
+  // Obtener productos del vendedor autenticado para el dashboard
+  async function fetchSellerProducts() {
+    try {
+      const response = await fetch('http://localhost:3000/api/products', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': localStorage.getItem('token')
+        }
+      });
+      if (response.ok) {
+        products = await response.json();
+        filteredProducts = products;
+        renderProducts(filteredProducts);
+        displayPagination(filteredProducts.length);
+        updatePageNumbers();
+      } else {
+        console.error('Error fetching products:', response.status);
+        noResults.classList.remove('hidden');
+        noResults.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      noResults.classList.remove('hidden');
+      noResults.style.display = 'block';
     }
   }
 
@@ -102,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       filteredProducts = products.filter(product => product.category === 'Supermercado');
     }
     currentPage = 1;
-    displayProducts(filteredProducts);
+    renderProducts(filteredProducts);
     displayPagination(filteredProducts.length);
     updatePageNumbers();
   });
@@ -112,19 +155,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchValue = e.target.value.toLowerCase();
     filteredProducts = products.filter(product => product.name.toLowerCase().includes(searchValue));
     currentPage = 1;
-    displayProducts(filteredProducts);
+    renderProducts(filteredProducts);
     displayPagination(filteredProducts.length);
     updatePageNumbers();
   });
 
-  // Mostrar todos los productos al cargar la página
-  fetchProducts();
+  // Mostrar todos los productos al cargar la página (o solo los del vendedor, según el contexto)
+  if (window.location.pathname.includes('dashboard.html')) {
+    fetchSellerProducts();
+  } else {
+    fetchAllProducts();
+  }
 
   // Paginación
   prevPage.addEventListener('click', () => {
     if (currentPage > 1) {
       currentPage--;
-      displayProducts(filteredProducts);
+      renderProducts(filteredProducts);
       updatePageNumbers();
     }
   });
@@ -133,12 +180,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
     if (currentPage < totalPages) {
       currentPage++;
-      displayProducts(filteredProducts);
+      renderProducts(filteredProducts);
       updatePageNumbers();
     }
   });
 });
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');

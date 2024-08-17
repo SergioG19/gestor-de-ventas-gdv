@@ -1,3 +1,4 @@
+// Product.js (Modelo de Mongoose)
 const mongoose = require('mongoose');
 
 const ProductSchema = new mongoose.Schema({
@@ -21,7 +22,7 @@ const ProductSchema = new mongoose.Schema({
         required: true,
         enum: ['Electrodomésticos', 'Tecnología', 'Supermercado']
     },
-    vendor: {
+    seller: {  // Cambiado de 'vendor' a 'seller'
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
