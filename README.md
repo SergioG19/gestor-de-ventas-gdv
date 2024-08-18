@@ -22,8 +22,8 @@ Antes de comenzar, asegúrate de tener instalado lo siguiente en tu máquina:
 1. Clona el repositorio:
 
     ```bash
-    git clone https://github.com/tu-usuario/tienda-sk.git
-    cd tienda-sk
+    git clone https://github.com/SergioG19/gestor-de-ventas-gdv
+    cd gestor-de-ventas-gdv
     ```
 
 2. Instala las dependencias:
@@ -43,14 +43,14 @@ Antes de comenzar, asegúrate de tener instalado lo siguiente en tu máquina:
 1. Inicia el servidor:
 
     ```bash
-    npm start
+    node app.js
     ```
 
     El servidor estará disponible en [http://localhost:3000](http://localhost:3000).
 
 2. Accede a la aplicación:
 
-    Abre tu navegador y navega a [http://localhost:3000](http://localhost:3000) para ver la aplicación en acción.
+    Abre visual studio code y con la extensión live server podras ver la aplicación en acción.
 
 ## Scripts Disponibles
 
