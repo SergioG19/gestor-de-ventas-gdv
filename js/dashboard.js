@@ -64,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('user');
     window.location.href = 'index.html';
   }
-  // Función para cargar el contenido del menú General
+
+  // Function to load General Content
   function loadGeneralContent() {
     dashboardContent.innerHTML = `
       <h2 class="text-2xl font-bold text-gray-800 mb-4" style="margin-top: 24px;">Estadísticas Generales</h2>
@@ -86,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchStats();
   }
 
-  // Función para obtener estadísticas del vendedor autenticado
+  // Function to fetch statistics of the authenticated seller
   async function fetchStats() {
     try {
       const response = await fetch('http://localhost:3000/api/stats', {
@@ -102,18 +103,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('totalSold').textContent = stats.totalSold;
         document.getElementById('totalBuyers').textContent = stats.totalBuyers;
       } else {
-        console.error('Error al obtener estadísticas:', response.status);
+        console.error('Error fetching statistics:', response.status);
       }
     } catch (error) {
-      console.error('Error al obtener estadísticas:', error);
+      console.error('Error fetching statistics:', error);
     }
   }
 
-  // Función para cargar el contenido del menú Inventario
+  // Function to load Inventory Content
   function loadInventarioContent() {
     dashboardContent.innerHTML = `
       <h2 class="text-2xl font-bold text-gray-800 mb-4" style="margin-top: 24px;">Inventario de Productos</h2>
       <button id="addProductBtn" class="hover:bg-green-600 text-black px-4 py-2 rounded mb-4" style="background-color: #00b4d8; margin-top: 24px;">Agregar Producto</button>
+
+      <div id="successMessage" class="text-green-500 font-bold mb-4 hidden" style="margin-top:24px;"></div>
 
       <div class="table-container">
         <table class="responsive-table">
@@ -134,14 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <p id="noProductsMessage" class="text-gray-600 mt-4 hidden">Todavía no se ha agregado ningún producto.</p>
     `;
-    fetchProducts(); // Cargar productos del vendedor autenticado desde la base de datos
+    fetchProducts(); // Load products of the authenticated seller from the database
 
     document.getElementById('addProductBtn').addEventListener('click', () => {
       showProductForm();
     });
   }
 
-  // Función para mostrar el formulario de agregar producto
+  // Function to show the product form
   function showProductForm(product = {}) {
     let existingForm = document.getElementById('productForm');
     if (existingForm) {
@@ -194,35 +197,35 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     dashboardContent.appendChild(formContainer);
-    document.body.classList.add('form-open'); // Añadir clase para opacar el fondo
+    document.body.classList.add('form-open'); // Add class to dim the background
 
     document.getElementById('addProductForm').addEventListener('submit', (e) => handleProductFormSubmit(e, product._id));
     document.querySelector('.cancel-btn').addEventListener('click', () => {
       formContainer.remove();
-      overlay.remove(); // Eliminar overlay al cerrar el formulario
+      overlay.remove(); // Remove overlay when form is closed
       document.body.classList.remove('form-open');
     });
   }
 
-  // Función para manejar la sumisión del formulario de producto
+  // Function to handle product form submission
   async function handleProductFormSubmit(e, productId) {
     e.preventDefault();
-
+  
     const formData = new FormData();
     formData.append('name', document.getElementById('productName').value);
     formData.append('price', parseFloat(document.getElementById('productPrice').value));
     formData.append('description', document.getElementById('productDescription').value);
     formData.append('category', document.getElementById('productCategory').value);
-
+  
     const imageFile = document.getElementById('productImage').files[0];
     if (imageFile) {
       formData.append('image', imageFile);
     }
-
+  
     try {
       const url = productId ? `http://localhost:3000/api/products/${productId}` : 'http://localhost:3000/api/products';
       const method = productId ? 'PUT' : 'POST';
-
+  
       const response = await fetch(url, {
         method,
         headers: {
@@ -230,24 +233,39 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         body: formData
       });
-
+  
       if (response.ok) {
-        fetchProducts();  // Recargar productos después de agregar/editar uno nuevo
-        document.getElementById('productForm').remove();  // Cerrar formulario
-        document.querySelector('.overlay').remove(); // Eliminar overlay al cerrar el formulario
-        document.body.classList.remove('form-open'); // Quitar opacidad del fondo
+        // Display success message
+        const successMessage = document.getElementById('successMessage');
+        successMessage.textContent = productId ? 'Producto actualizado con éxito' : 'Producto agregado con éxito';
+        successMessage.classList.remove('hidden');
+        successMessage.style.display = 'block';
+
+        // Hide message after 5 seconds
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 5000);
+
+        // Reload products to reflect the changes
+        fetchProducts();
+        document.getElementById('productForm').remove();  // Close form
+        document.querySelector('.overlay').remove(); // Remove overlay when form is closed
+        document.body.classList.remove('form-open'); // Remove background opacity
       } else {
         const errorResponse = await response.json();
-        console.error('Error al procesar el producto:', errorResponse);
-        alert('Error al procesar el producto: ' + (errorResponse.errors[0]?.msg || 'Error desconocido'));
+        console.error('Error processing the product:', errorResponse);
+        if (errorResponse.errors && errorResponse.errors.length > 0) {
+          alert('Error processing the product: ' + errorResponse.errors[0].msg);
+        }
       }
     } catch (error) {
-      console.error('Error al procesar el producto:', error);
-      alert('Error al procesar el producto: ' + error.message);
+      console.error('Network or other error:', error);
+      // Remove alert to prevent false error display
+      // alert('Error processing the product: ' + error.message);
     }
   }
 
-  // Función para obtener y filtrar productos por usuario (vendedor autenticado)
+  // Function to fetch and filter products by the authenticated user (seller)
   async function fetchProducts() {
     try {
       const response = await fetch('http://localhost:3000/api/products', {
@@ -261,29 +279,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const products = await response.json();
         renderProducts(products);
       } else {
-        console.error('Error al obtener productos:', response.status);
+        console.error('Error fetching products:', response.status);
       }
     } catch (error) {
-      console.error('Error al obtener productos:', error);
+      console.error('Error fetching products:', error);
     }
   }
 
-  // Renderizar productos en la tabla
+  // Function to render products in the table
   function renderProducts(products) {
     const productsTableBody = document.getElementById('productsTableBody');
     const noProductsMessage = document.getElementById('noProductsMessage');
-    productsTableBody.innerHTML = ''; // Limpiar tabla
+    productsTableBody.innerHTML = ''; // Clear table
 
     if (products.length === 0) {
-        noProductsMessage.classList.remove('hidden'); // Mostrar mensaje si no hay productos
+        noProductsMessage.classList.remove('hidden'); // Show message if there are no products
         noProductsMessage.style.display = 'block';
     } else {
-        noProductsMessage.classList.add('hidden'); // Ocultar mensaje si hay productos
+        noProductsMessage.classList.add('hidden'); // Hide message if there are products
         noProductsMessage.style.display = 'none';
         products.forEach(product => {
             const tr = document.createElement('tr');
 
-            // Asegúrate de que la ruta de la imagen esté correctamente formada
+            // Ensure the image path is correctly formed
             const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '/images/no-image.png';
 
             tr.innerHTML = `
@@ -306,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Función para eliminar un producto
+  // Function to delete a product
   async function deleteProduct(productId) {
     if (confirm('¿Seguro que quieres eliminar este producto?')) {
       try {
@@ -319,20 +337,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (response.ok) {
-          fetchProducts(); // Recargar productos después de eliminar
+          fetchProducts(); // Reload products after deletion
         } else {
-          console.error('Error al eliminar producto:', response.status);
-          alert('Error al eliminar producto.');
+          console.error('Error deleting product:', response.status);
+          alert('Error deleting product.');
         }
       } catch (error) {
-        console.error('Error al eliminar producto:', error);
-        alert('Error al eliminar producto: ' + error.message);
+        console.error('Error deleting product:', error);
+        alert('Error deleting product: ' + error.message);
       }
     }
   }
 
-  
-  // Manejar la actualización del usuario
+  // Handle user update
   async function handleUserUpdate(event) {
     event.preventDefault();
     const editUserForm = event.target;
