@@ -12,18 +12,21 @@
       align-items: center;
       min-height: 100vh;
       background-color: #f3f4f6;
+      margin: 0;
     }
     .edit-user-container {
       background-color: #fff;
       padding: 2rem;
       border-radius: 0.5rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
+      max-width: 400px; /* Appropriate width for larger screens */
       width: 100%;
+      box-sizing: border-box;
     }
     .edit-user-container h2 {
       margin-bottom: 1.5rem;
       text-align: center;
+      font-size: 1.5rem;
     }
     .edit-user-container form {
       display: flex;
@@ -35,12 +38,14 @@
     .edit-user-container form .form-control label {
       display: block;
       margin-bottom: 0.5rem;
+      font-size: 1rem;
     }
     .edit-user-container form .form-control input, .edit-user-container form .form-control select {
       width: 100%;
       padding: 0.5rem;
       border: 1px solid #d1d5db;
       border-radius: 0.25rem;
+      font-size: 1rem;
     }
     .edit-user-container form button {
       padding: 0.75rem;
@@ -50,9 +55,47 @@
       border-radius: 0.25rem;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      font-size: 1rem;
     }
     .edit-user-container form button:hover {
       background-color: #2563eb;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .edit-user-container {
+        padding: 1.5rem;
+        max-width: 90%; /* Slightly narrower on tablets */
+      }
+      .edit-user-container h2 {
+        font-size: 1.25rem;
+      }
+      .edit-user-container form .form-control label,
+      .edit-user-container form .form-control input,
+      .edit-user-container form button {
+        font-size: 0.9rem;
+      }
+      .edit-user-container form button {
+        padding: 0.65rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .edit-user-container {
+        padding: 1rem;
+        max-width: 90%; /* Narrower on phones */
+      }
+      .edit-user-container h2 {
+        font-size: 1.1rem;
+      }
+      .edit-user-container form .form-control label,
+      .edit-user-container form .form-control input,
+      .edit-user-container form button {
+        font-size: 0.85rem;
+      }
+      .edit-user-container form button {
+        padding: 0.6rem;
+      }
     }
   </style>
 </head>

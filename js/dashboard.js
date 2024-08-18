@@ -2,10 +2,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userGreeting = document.getElementById('userGreeting');
   const logoutBtn = document.getElementById('logoutBtn');
+  const logoutBtnSecondary = document.getElementById('logoutBtnSecondary');
   const menuGeneral = document.getElementById('menuGeneral');
   const menuInventario = document.getElementById('menuInventario');
   const menuConfig = document.getElementById('menuConfig');
   const dashboardContent = document.getElementById('dashboardContent');
+  const sidebar = document.querySelector('.sidebar');
+  const hamburgerMenu = document.getElementById('hamburgerMenu');
+  const secondaryHamburgerMenu = document.getElementById('secondaryHamburgerMenu');
+  const secondaryMenu = document.getElementById('secondaryMenu');
+  const closeSidebar = document.getElementById('closeSidebar');
+  const backToTop = document.getElementById('backToTop');
 
   if (!user) {
     window.location.href = 'login.html';
@@ -14,28 +21,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
   userGreeting.textContent = `Bienvenido, ${user.name}`;
 
-  logoutBtn.addEventListener('click', () => {
+  logoutBtn.addEventListener('click', handleLogout);
+  logoutBtnSecondary.addEventListener('click', handleLogout);
+
+  // Toggle sidebar visibility on mobile
+  hamburgerMenu.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+  });
+
+  // Toggle secondary menu visibility
+  secondaryHamburgerMenu.addEventListener('click', () => {
+    secondaryMenu.style.display = secondaryMenu.style.display === 'block' ? 'none' : 'block';
+  });
+
+  // Close sidebar when the close button is clicked
+  closeSidebar.addEventListener('click', () => {
+    sidebar.classList.remove('active');
+  });
+
+  // Close sidebar when a menu item is clicked (for mobile)
+  [menuGeneral, menuInventario, menuConfig].forEach(menuItem => {
+    menuItem.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+    });
+  });
+
+  // Scroll to top
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Load General Content by default
+  loadGeneralContent();
+
+  menuGeneral.addEventListener('click', loadGeneralContent);
+  menuInventario.addEventListener('click', loadInventarioContent);
+  menuConfig.addEventListener('click', loadConfigContent);
+
+  // Function to handle logout
+  function handleLogout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = 'index.html';
-  });
-
-  // Cargar contenido inicial (General)
-  loadGeneralContent();
-
-  // Evento para el menú de General
-  menuGeneral.addEventListener('click', loadGeneralContent);
-
-  // Evento para el menú de Inventario
-  menuInventario.addEventListener('click', loadInventarioContent);
-
-  // Evento para el menú de Configuración de Usuario
-  menuConfig.addEventListener('click', loadConfigContent);
-
+  }
   // Función para cargar el contenido del menú General
   function loadGeneralContent() {
     dashboardContent.innerHTML = `
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Estadísticas Generales</h2>
+      <h2 class="text-2xl font-bold text-gray-800 mb-4" style="margin-top: 24px;">Estadísticas Generales</h2>
       <div class="stats-grid">
         <div class="stat-item">
           <h3>Total de Productos Publicados</h3>
@@ -84,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <button id="addProductBtn" class="hover:bg-green-600 text-black px-4 py-2 rounded mb-4" style="background-color: #00b4d8; margin-top: 24px;">Agregar Producto</button>
 
       <div class="table-container">
-        <table>
+        <table class="responsive-table">
           <thead>
             <tr>
               <th>Imagen</th>
@@ -127,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     formContainer.innerHTML = `
       <div class="form-container">
         <h2 class="text-xl font-bold mb-4">${product._id ? 'Editar Producto' : 'Agregar Producto'}</h2>
-        <form id="addProductForm" class="space-y-4">
+        <form id="addProductForm" class="space-y-4 responsive-form">
           <div class="form-control">
             <label for="productName" class="block text-sm font-medium text-gray-700">Nombre del Producto</label>
             <input type="text" id="productName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required value="${product.name || ''}">
@@ -261,8 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${product.description}</td>
                 <td>${product.category}</td>
                 <td class="table-actions">
-                    <button class="edit-btn" style="background-color: #3b82f6; color: white; padding: 5px 10px; border: none; border-radius: 4px;">Editar</button>
-                    <button class="delete-btn" style="background-color: #ef4444; color: white; padding: 5px 10px; border: none; border-radius: 4px;">Eliminar</button>
+                    <button class="edit-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Editar</button>
+                    <button class="delete-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Eliminar</button>
                 </td>
             `;
 
@@ -272,9 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
             productsTableBody.appendChild(tr);
         });
     }
-}
-
-
+  }
 
   // Función para eliminar un producto
   async function deleteProduct(productId) {
@@ -301,38 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Función para cargar el contenido de configuración de usuario
-  function loadConfigContent() {
-    dashboardContent.innerHTML = `
-      <h2>Configuración de Usuario</h2>
-      <p>Aquí puedes editar tu nombre, correo, contraseña y rol.</p>
-      <form id="editUserForm">
-        <div class="form-control">
-          <label for="name">Nombre Completo</label>
-          <input type="text" id="name" required value="${user.name}">
-        </div>
-        <div class="form-control">
-          <label for="email">Correo Electrónico</label>
-          <input type="email" id="email" required value="${user.email}">
-        </div>
-        <div class="form-control">
-          <label for="password">Contraseña</label>
-          <input type="password" id="password">
-        </div>
-        <div class="form-control">
-          <label for="role">Rol</label>
-          <select id="role" required>
-            <option value="buyer" ${user.role === 'buyer' ? 'selected' : ''}>Comprador</option>
-            <option value="seller" ${user.role === 'seller' ? 'selected' : ''}>Vendedor</option>
-          </select>
-        </div>
-        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Actualizar</button>
-      </form>
-    `;
-
-    document.getElementById('editUserForm').addEventListener('submit', handleUserUpdate);
-  }
-
+  
   // Manejar la actualización del usuario
   async function handleUserUpdate(event) {
     event.preventDefault();

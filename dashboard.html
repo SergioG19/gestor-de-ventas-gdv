@@ -11,6 +11,7 @@
       display: flex;
       min-height: 100vh;
       background-color: #f3f4f6;
+      margin: 0;
     }
     .sidebar {
       width: 250px;
@@ -20,6 +21,7 @@
       flex-direction: column;
       padding: 20px;
       box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      position: relative;
     }
     .sidebar h2 {
       font-size: 1.5rem;
@@ -37,9 +39,26 @@
     .sidebar a:hover {
       background-color: #374151;
     }
+    .close-btn {
+      display: none; /* Hidden by default */
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #374151;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .close-btn:hover {
+      background-color: #2c2f33;
+    }
     .content {
       flex: 1;
       padding: 20px;
+      width: 100%;
     }
     .header {
       background-color: #3b82f6;
@@ -51,6 +70,11 @@
     }
     .header h1 {
       font-size: 1.5rem;
+      flex-grow: 1;
+    }
+    .header nav {
+      display: flex;
+      align-items: center;
     }
     .header nav a {
       color: #fff;
@@ -61,6 +85,57 @@
     .header nav a:hover {
       color: #d1d5db;
     }
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+      margin-right: 20px;
+    }
+    .hamburger span {
+      height: 3px;
+      background: white;
+      border-radius: 5px;
+    }
+    .secondary-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .secondary-hamburger span {
+      height: 3px;
+      background: white;
+      border-radius: 5px;
+    }
+    .secondary-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: #3b82f6;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .secondary-menu a {
+      color: white;
+      display: block;
+      padding: 10px;
+      text-decoration: none;
+      border-bottom: 1px solid #2a69ac;
+    }
+    .secondary-menu a:last-child {
+      border-bottom: none;
+    }
+    .secondary-menu a:hover {
+      background-color: #2563eb;
+    }
+
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -179,27 +254,87 @@
     .popup-form .form-actions .cancel-btn:hover {
       background-color: #9ca3af;
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        width: 250px;
+        height: 100%;
+        transition: left 0.3s ease;
+        z-index: 1000;
+      }
+      .sidebar.active {
+        left: 0;
+      }
+      .hamburger {
+        display: flex;
+      }
+      .secondary-hamburger {
+        display: flex;
+      }
+      .header nav a {
+        display: none;
+      }
+      .secondary-menu {
+        right: 20px;
+      }
+      .close-btn {
+        display: block; /* Show only on tablets and phones */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .content {
+        padding: 10px;
+      }
+      .header {
+        padding: 10px;
+      }
+      .header h1 {
+        font-size: 1.2rem;
+      }
+    }
   </style>
 </head>
 <body>
   <!-- Barra lateral -->
   <aside class="sidebar">
-    <h2>Gestor de Ventas</h2>
+    <button class="close-btn" id="closeSidebar">×</button>
+    <h2 style="font-size: 20px; font-weight: bold;">Gestor de Ventas</h2>
     <a href="#" id="menuGeneral">General</a>
     <a href="#" id="menuInventario">Inventario</a>
-    <a href="#" id="menuConfig">Configuración de Usuario</a>
+    <a href="edit-user.html" id="menuConfig">Configuración de Usuario</a>
   </aside>
 
   <!-- Contenido principal -->
   <div class="content">
     <!-- Header del Dashboard -->
     <header class="header">
+      <div class="hamburger" id="hamburgerMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
       <h1 id="userGreeting">Bienvenido, Usuario</h1>
       <nav>
+        <div class="secondary-hamburger" id="secondaryHamburgerMenu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
         <a href="index.html">Volver al Inicio</a>
         <a href="#" id="logoutBtn">Cerrar Sesión</a>
       </nav>
     </header>
+
+    <!-- Secondary Menu -->
+    <div class="secondary-menu" id="secondaryMenu">
+      <a href="index.html" id="backToTop">Volver al Inicio</a>
+      <a href="#" id="logoutBtnSecondary">Cerrar Sesión</a>
+    </div>
 
     <!-- Aquí irá el contenido dinámico según el menú seleccionado -->
     <section id="dashboardContent">
