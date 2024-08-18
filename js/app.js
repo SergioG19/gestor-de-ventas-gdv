@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '';
 
         productCard.innerHTML = `
-          <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: cover; margin-bottom: 10px; border-radius: 8px;">
+          <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; border-radius: 8px;">
           <h2 style="font-size: 1rem; font-weight: bold; margin-bottom: 8px;">${product.name}</h2>
           <p style="font-size: 1rem; font-weight: bold; color: #333; margin-bottom: 8px;">$${product.price}</p>
           <p style="color: green; margin-bottom: 8px;">Envío gratis</p>
