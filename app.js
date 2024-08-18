@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path'); // Importar path para manejar rutas de archivos
 const connectDB = require('./db');
 const cors = require('cors');
 const app = express();
@@ -9,6 +10,9 @@ connectDB();
 // Middleware
 app.use(cors()); // Agregar CORS
 app.use(express.json());
+
+// Servir la carpeta 'uploads' de manera estática
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rutas
 app.use('/api/auth', require('./js/routes/auth'));

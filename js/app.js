@@ -6,13 +6,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prevPage = document.getElementById('prevPage');
   const nextPage = document.getElementById('nextPage');
   const pageNumbers = document.getElementById('pageNumbers');
+  const footer = document.querySelector('footer');
 
   let products = [];
   let filteredProducts = [];
   let currentPage = 1;
-  const productsPerPage = 4;
+  const productsPerPage = 6;
 
-  // Función para mostrar productos
+  // Estilos para el contenedor de productos
+  productList.style.display = 'grid';
+  productList.style.gap = '20px';
+  productList.style.justifyContent = 'center';
+  productList.style.padding = '20px';
+
+  // Estilos para grid responsivo
+  const updateGridColumns = () => {
+    if (window.innerWidth >= 1024) {
+      productList.style.gridTemplateColumns = 'repeat(3, 1fr)'; // 3 columnas en pantallas grandes
+    } else if (window.innerWidth >= 768) {
+      productList.style.gridTemplateColumns = 'repeat(2, 1fr)'; // 2 columnas en pantallas medianas
+    } else {
+      productList.style.gridTemplateColumns = 'repeat(1, 1fr)'; // 1 columna en pantallas pequeñas
+    }
+  };
+  updateGridColumns();
+  window.addEventListener('resize', updateGridColumns);
+
+  // Eliminar absolute positioning en el footer
+  footer.style.position = 'relative'; 
+  footer.style.width = '100%';
+
+  // Función para mostrar productos en la página de inicio
   function renderProducts(productsToRender) {
     productList.innerHTML = '';
     if (productsToRender.length === 0) {
@@ -28,15 +52,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       paginatedProducts.forEach(product => {
         const productCard = document.createElement('div');
-        productCard.classList.add('bg-white', 'p-4', 'rounded-md', 'shadow-md', 'border');
+        productCard.classList.add('product-card');
+
+        // Establecer el estilo para las tarjetas de productos responsivas
+        productCard.style.width = '100%';
+        productCard.style.height = 'auto';
+        productCard.style.padding = '20px';
+        productCard.style.boxSizing = 'border-box';
+        productCard.style.border = '1px solid #ddd';
+        productCard.style.borderRadius = '10px';
+        productCard.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+        productCard.style.backgroundColor = '#fff';
+
+        const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '';
 
         productCard.innerHTML = `
-          <img src="${product.image || 'default-image-url.jpg'}" alt="${product.name}" class="w-full h-48 object-cover rounded-md mb-4">
-          <h2 class="text-xl font-bold mb-2">${product.name}</h2>
-          <p class="text-gray-900 font-bold mb-2">$${product.price}</p>
-          <p class="text-green-600">Envío gratis</p>
-          <p class="text-gray-700 mb-2">${product.description}</p>
-          <p class="text-gray-600 text-sm">Vendedor: ${product.seller.name}</p>
+          <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: cover; margin-bottom: 10px; border-radius: 8px;">
+          <h2 style="font-size: 1rem; font-weight: bold; margin-bottom: 8px;">${product.name}</h2>
+          <p style="font-size: 1rem; font-weight: bold; color: #333; margin-bottom: 8px;">$${product.price}</p>
+          <p style="color: green; margin-bottom: 8px;">Envío gratis</p>
+          <p style="color: #555; margin-bottom: 8px;">${product.description}</p>
+          <p style="color: #777; font-size: 0.8rem;">Vendedor: ${product.seller.name}</p>
         `;
 
         productList.appendChild(productCard);
@@ -59,6 +95,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       pageNumbers.appendChild(pageNumber);
     }
+
+    // Centrar la paginación
+    pageNumbers.style.display = 'flex';
+    pageNumbers.style.justifyContent = 'center';
+    pageNumbers.style.marginTop = '20px';
   }
 
   // Función para actualizar la paginación
@@ -66,14 +107,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pageNumberButtons = document.querySelectorAll('.page-number');
     pageNumberButtons.forEach((button, index) => {
       if (index + 1 === currentPage) {
-        button.classList.add('bg-blue-500', 'text-white');
+        button.classList.add('bg-blue-500', 'text-red');
       } else {
-        button.classList.remove('bg-blue-500', 'text-white');
+        button.classList.remove('bg-blue-500', 'text-red');
       }
     });
   }
-
-  // Obtener todos los productos para la página de inicio
   async function fetchAllProducts() {
     try {
       const response = await fetch('http://localhost:3000/api/products/all', {
@@ -84,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       if (response.ok) {
         products = await response.json();
+
         filteredProducts = products;
         renderProducts(filteredProducts);
         displayPagination(filteredProducts.length);

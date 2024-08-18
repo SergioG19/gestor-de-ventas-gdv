@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <table>
           <thead>
             <tr>
+              <th>Imagen</th>
               <th>Nombre</th>
               <th>Precio</th>
               <th>Descripción</th>
@@ -148,6 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
               <option value="Supermercado" ${product.category === 'Supermercado' ? 'selected' : ''}>Supermercado</option>
             </select>
           </div>
+          <div class="form-control">
+            <label for="productImage" class="block text-sm font-medium text-gray-700">Imagen del Producto</label>
+            <input type="file" id="productImage" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
           <div class="form-actions flex justify-end space-x-4">
             <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">${product._id ? 'Actualizar' : 'Guardar'}</button>
             <button type="button" class="cancel-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancelar</button>
@@ -171,12 +176,16 @@ document.addEventListener('DOMContentLoaded', () => {
   async function handleProductFormSubmit(e, productId) {
     e.preventDefault();
 
-    const formData = {
-      name: document.getElementById('productName').value,
-      price: parseFloat(document.getElementById('productPrice').value),
-      description: document.getElementById('productDescription').value,
-      category: document.getElementById('productCategory').value
-    };
+    const formData = new FormData();
+    formData.append('name', document.getElementById('productName').value);
+    formData.append('price', parseFloat(document.getElementById('productPrice').value));
+    formData.append('description', document.getElementById('productDescription').value);
+    formData.append('category', document.getElementById('productCategory').value);
+
+    const imageFile = document.getElementById('productImage').files[0];
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
 
     try {
       const url = productId ? `http://localhost:3000/api/products/${productId}` : 'http://localhost:3000/api/products';
@@ -185,10 +194,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
           'x-auth-token': localStorage.getItem('token')
         },
-        body: JSON.stringify(formData)
+        body: formData
       });
 
       if (response.ok) {
@@ -235,32 +243,38 @@ document.addEventListener('DOMContentLoaded', () => {
     productsTableBody.innerHTML = ''; // Limpiar tabla
 
     if (products.length === 0) {
-      noProductsMessage.classList.remove('hidden'); // Mostrar mensaje si no hay productos
-      noProductsMessage.style.display = 'block';
+        noProductsMessage.classList.remove('hidden'); // Mostrar mensaje si no hay productos
+        noProductsMessage.style.display = 'block';
     } else {
-      noProductsMessage.classList.add('hidden'); // Ocultar mensaje si hay productos
-      noProductsMessage.style.display = 'none';
-      products.forEach(product => {
-        const tr = document.createElement('tr');
+        noProductsMessage.classList.add('hidden'); // Ocultar mensaje si hay productos
+        noProductsMessage.style.display = 'none';
+        products.forEach(product => {
+            const tr = document.createElement('tr');
 
-        tr.innerHTML = `
-          <td>${product.name}</td>
-          <td>$${product.price}</td>
-          <td>${product.description}</td>
-          <td>${product.category}</td>
-          <td class="table-actions">
-            <button class="edit-btn bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">Editar</button>
-            <button class="delete-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
-          </td>
-        `;
+            // Asegúrate de que la ruta de la imagen esté correctamente formada
+            const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '/images/no-image.png';
 
-        tr.querySelector('.edit-btn').addEventListener('click', () => showProductForm(product));
-        tr.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product._id));
+            tr.innerHTML = `
+                <td><img src="${imageUrl}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                <td>${product.name}</td>
+                <td>$${product.price}</td>
+                <td>${product.description}</td>
+                <td>${product.category}</td>
+                <td class="table-actions">
+                    <button class="edit-btn" style="background-color: #3b82f6; color: white; padding: 5px 10px; border: none; border-radius: 4px;">Editar</button>
+                    <button class="delete-btn" style="background-color: #ef4444; color: white; padding: 5px 10px; border: none; border-radius: 4px;">Eliminar</button>
+                </td>
+            `;
 
-        productsTableBody.appendChild(tr);
-      });
+            tr.querySelector('.edit-btn').addEventListener('click', () => showProductForm(product));
+            tr.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product._id));
+
+            productsTableBody.appendChild(tr);
+        });
     }
-  }
+}
+
+
 
   // Función para eliminar un producto
   async function deleteProduct(productId) {

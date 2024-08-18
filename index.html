@@ -3,10 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Página de Inicio - Gestor de Ventas</title>
+  <title>Página de Inicio - Tienda SK</title>
   <link rel="stylesheet" href="css/styles.css">
   <style>
     /* Estilos adicionales */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      padding-bottom: 20px; /* Espacio para que el contenido no toque el footer */
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .product-card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    footer {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+      margin-top: 20px;
+      flex-shrink: 0; /* Evita que el footer se encoja */
+    }
+
+    /* Center the search bar */
+    .search-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    /* Estilo para la barra de búsqueda */
+    #searchBar {
+      width: 100%;
+      max-width: 500px; /* Limit the maximum width */
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    /* Media query para hacer la barra de búsqueda más pequeña en teléfonos */
+    @media (max-width: 600px) {
+      #searchBar {
+        width: 80%; /* Hacer la barra de búsqueda más pequeña */
+        padding: 8px; /* Reducir el padding */
+        font-size: 0.875rem; /* Tamaño de fuente más pequeño */
+      }
+    }
+
+    /* Estilo para el contenedor de filtros */
+    .filter-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    /* Media query para cambiar el diseño del filtro en teléfonos y tabletas */
+    @media (max-width: 768px) {
+      .filter-container {
+        flex-direction: column; /* Cambiar a columna */
+        align-items: center; /* Centrar los elementos */
+      }
+
+      .filter-container label {
+        margin-bottom: 8px; /* Espacio debajo del texto "Filtrar por" */
+        text-align: center; /* Centrar el texto */
+      }
+
+      .filter-container select {
+        width: 70%; /* Hacer el botón de filtro más pequeño */
+        padding: 8px; /* Ajustar el padding para que coincida con el tamaño */
+        font-size: 0.875rem; /* Ajustar el tamaño de la fuente */
+      }
+    }
+
+    /* Centrar la paginación en todas las pantallas */
+    #pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    #pagination button {
+      padding: 10px;
+      margin: 0 5px;
+      border-radius: 5px;
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      cursor: pointer;
+    }
+
+    #pagination button:hover {
+      background-color: #e0e0e0;
+    }
+
+    #pageNumbers {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -14,7 +140,7 @@
     <!-- Header -->
     <header class="bg-blue-600 text-white p-4">
       <div class="container mx-auto flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Gestor de Ventas</h1>
+        <h1 class="text-2xl font-bold">Tinda SK</h1>
         <nav id="userNav">
           <a href="login.html" class="px-4">Iniciar Sesión</a>
           <a href="register.html" class="px-4">Registrarse</a>
@@ -25,27 +151,25 @@
     <!-- Main Content -->
     <main class="container mx-auto py-8">
       <!-- Barra de Búsqueda -->
-      <div class="mb-6">
-        <input type="text" id="searchBar" placeholder="Buscar productos..." class="w-full px-4 py-2 border rounded-md">
+      <div class="search-container">
+        <input type="text" id="searchBar" placeholder="Buscar productos..." class="px-4 py-2 border rounded-md">
       </div>
 
       <!-- Opciones de Filtrado -->
-      <div class="mb-6 flex justify-between items-center">
-        <div>
-          <label for="filter" class="mr-2">Filtrar por:</label>
-          <select id="filter" class="px-4 py-2 border rounded-md">
-            <option value="all">Todos</option>
-            <option value="price_asc">Menor a Mayor Precio</option>
-            <option value="price_desc">Mayor a Menor Precio</option>
-            <option value="category_appliances">Electrodomésticos</option>
-            <option value="category_tech">Tecnología</option>
-            <option value="category_supermarket">Supermercado</option>
-          </select>
-        </div>
+      <div class="filter-container">
+        <label for="filter">Filtrar por:</label>
+        <select id="filter" class="px-4 py-2 border rounded-md">
+          <option value="all">Todos</option>
+          <option value="price_asc">Menor a Mayor Precio</option>
+          <option value="price_desc">Mayor a Menor Precio</option>
+          <option value="category_appliances">Electrodomésticos</option>
+          <option value="category_tech">Tecnología</option>
+          <option value="category_supermarket">Supermercado</option>
+        </select>
       </div>
 
       <!-- Listado de Productos -->
-      <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <!-- Productos serán insertados aquí mediante JavaScript -->
       </div>
 
@@ -63,7 +187,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white p-4 mt-8">
+    <footer>
       <div class="container mx-auto text-center">
         <p>&copy; 2024 Gestor de Ventas. Todos los derechos reservados.</p>
       </div>

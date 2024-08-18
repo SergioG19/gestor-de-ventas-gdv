@@ -15,7 +15,7 @@ const ProductSchema = new mongoose.Schema({
         required: true
     },
     image: {
-        type: String
+        type: String, // Ruta de la imagen almacenada
     },
     category: {
         type: String,
