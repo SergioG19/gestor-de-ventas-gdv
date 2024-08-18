@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '/images/no-image.png';
 
             tr.innerHTML = `
-                <td><img src="${imageUrl}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                <td><img src="${imageUrl}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: contain;"></td>
                 <td>${product.name}</td>
                 <td>$${product.price}</td>
                 <td>${product.description}</td>
