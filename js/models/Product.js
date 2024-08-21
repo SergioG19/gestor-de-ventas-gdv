@@ -25,6 +25,11 @@ const ProductSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    quantity: {
+        type: Number,
+        required: true, // Hacemos que la cantidad sea obligatoria
+        default: 1     // Valor por defecto de 1
     }
 });
 

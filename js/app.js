@@ -67,12 +67,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '';
 
         productCard.innerHTML = `
-          <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; border-radius: 8px;">
-          <h2 style="font-size: 1rem; font-weight: bold; margin-bottom: 8px;">${product.name}</h2>
-          <p style="font-size: 1rem; font-weight: bold; color: #333; margin-bottom: 8px;">$${product.price}</p>
-          <p style="color: green; margin-bottom: 8px;">Envío gratis</p>
-          <p style="color: #555; margin-bottom: 8px;">${product.description}</p>
-          <p style="color: #777; font-size: 0.8rem;">Vendedor: ${product.seller.name}</p>
+           <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; border-radius: 8px;">
+                <h2 style="font-size: 1rem; font-weight: bold; margin-bottom: 8px;">${product.name}</h2>
+                <p style="font-size: 1rem; font-weight: bold; color: #333; margin-bottom: 8px;">$${product.price}</p>
+                <p style="color: green; margin-bottom: 8px;">Envío gratis</p>
+                <p style="color: #555; margin-bottom: 8px;">${product.description}</p>
+                <p style="color: #555; margin-bottom: 8px;">Cantidad disponible: ${product.quantity}</p>  <!-- Mostrar cantidad -->
+                <p style="color: #777; font-size: 0.8rem;">Vendedor: ${product.seller.name}</p>
         `;
 
         productList.appendChild(productCard);
@@ -262,33 +263,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Función para manejar el registro
-  async function handleRegister(event) {
-    event.preventDefault();
-    const name = registerForm.name.value;
-    const email = registerForm.email.value;
-    const password = registerForm.password.value;
-    const role = registerForm.role.value;
+async function handleRegister(event) {
+  event.preventDefault();
+  const name = registerForm.name.value;
+  const email = registerForm.email.value;
+  const password = registerForm.password.value;
+  const role = registerForm.role.value;
 
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name, email, password, role })
-      });
+  // Verificación de formato de correo electrónico
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert('Este correo no tiene el formato adecuado. ¿Intentamos de nuevo?');
+    return;
+  }
 
-      if (response.ok) {
-        alert('Registro exitoso. Por favor, inicia sesión.');
-        window.location.href = 'login.html';
-      } else {
-        alert('Error en el registro. Por favor, intenta de nuevo.');
-      }
-    } catch (error) {
-      console.error('Error en el registro:', error);
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, email, password, role })
+    });
+
+    if (response.ok) {
+      alert('Registro exitoso. Por favor, inicia sesión.');
+      window.location.href = 'login.html';
+    } else {
       alert('Error en el registro. Por favor, intenta de nuevo.');
     }
+  } catch (error) {
+    console.error('Error en el registro:', error);
+    alert('Error en el registro. Por favor, intenta de nuevo.');
   }
+}
+
 
   // Función para manejar la edición de usuario
   async function handleEditUser(event) {

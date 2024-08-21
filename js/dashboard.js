@@ -127,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <th>Precio</th>
               <th>Descripción</th>
               <th>Categoría</th>
+              <th>Cantidad</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -148,8 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function showProductForm(product = {}) {
     let existingForm = document.getElementById('productForm');
     if (existingForm) {
-      existingForm.style.display = 'block';
-      return;
+        existingForm.style.display = 'block';
+        return;
     }
 
     const overlay = document.createElement('div');
@@ -160,110 +161,116 @@ document.addEventListener('DOMContentLoaded', () => {
     formContainer.id = 'productForm';
     formContainer.classList.add('popup-form', 'active');
     formContainer.innerHTML = `
-      <div class="form-container">
-        <h2 class="text-xl font-bold mb-4">${product._id ? 'Editar Producto' : 'Agregar Producto'}</h2>
-        <form id="addProductForm" class="space-y-4 responsive-form">
-          <div class="form-control">
-            <label for="productName" class="block text-sm font-medium text-gray-700">Nombre del Producto</label>
-            <input type="text" id="productName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required value="${product.name || ''}">
-          </div>
-          <div class="form-control">
-            <label for="productPrice" class="block text-sm font-medium text-gray-700">Precio</label>
-            <input type="number" id="productPrice" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required value="${product.price || ''}">
-          </div>
-          <div class="form-control">
-            <label for="productDescription" class="block text-sm font-medium text-gray-700">Descripción</label>
-            <textarea id="productDescription" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>${product.description || ''}</textarea>
-          </div>
-          <div class="form-control">
-            <label for="productCategory" class="block text-sm font-medium text-gray-700">Categoría</label>
-            <select id="productCategory" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-              <option value="">Seleccione una categoría</option>
-              <option value="Electrodomésticos" ${product.category === 'Electrodomésticos' ? 'selected' : ''}>Electrodomésticos</option>
-              <option value="Tecnología" ${product.category === 'Tecnología' ? 'selected' : ''}>Tecnología</option>
-              <option value="Supermercado" ${product.category === 'Supermercado' ? 'selected' : ''}>Supermercado</option>
-            </select>
-          </div>
-          <div class="form-control">
-            <label for="productImage" class="block text-sm font-medium text-gray-700">Imagen del Producto</label>
-            <input type="file" id="productImage" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-          </div>
-          <div class="form-actions flex justify-end space-x-4">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">${product._id ? 'Actualizar' : 'Guardar'}</button>
-            <button type="button" class="cancel-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancelar</button>
-          </div>
-        </form>
-      </div>
+        <div class="form-container">
+            <h2 class="text-xl font-bold mb-4">${product._id ? 'Editar Producto' : 'Agregar Producto'}</h2>
+            <form id="addProductForm" class="space-y-4 responsive-form">
+                <div class="form-control">
+                    <label for="productName" class="block text-sm font-medium text-gray-700">Nombre del Producto</label>
+                    <input type="text" id="productName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required value="${product.name || ''}">
+                </div>
+                <div class="form-control">
+                    <label for="productPrice" class="block text-sm font-medium text-gray-700">Precio</label>
+                    <input type="number" id="productPrice" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required value="${product.price || ''}">
+                </div>
+                <div class="form-control">
+                    <label for="productDescription" class="block text-sm font-medium text-gray-700">Descripción</label>
+                    <textarea id="productDescription" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>${product.description || ''}</textarea>
+                </div>
+                <div class="form-control">
+                    <label for="productCategory" class="block text-sm font-medium text-gray-700">Categoría</label>
+                    <select id="productCategory" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                        <option value="">Seleccione una categoría</option>
+                        <option value="Electrodomésticos" ${product.category === 'Electrodomésticos' ? 'selected' : ''}>Electrodomésticos</option>
+                        <option value="Tecnología" ${product.category === 'Tecnología' ? 'selected' : ''}>Tecnología</option>
+                        <option value="Supermercado" ${product.category === 'Supermercado' ? 'selected' : ''}>Supermercado</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label for="productQuantity" class="block text-sm font-medium text-gray-700">Cantidad</label>
+                    <input type="number" id="productQuantity" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required value="${product.quantity || 1}">
+                </div>
+                <div class="form-control">
+                    <label for="productImage" class="block text-sm font-medium text-gray-700">Imagen del Producto</label>
+                    <input type="file" id="productImage" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div class="form-actions flex justify-end space-x-4">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">${product._id ? 'Actualizar' : 'Guardar'}</button>
+                    <button type="button" class="cancel-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancelar</button>
+                </div>
+            </form>
+        </div>
     `;
 
     dashboardContent.appendChild(formContainer);
-    document.body.classList.add('form-open'); // Add class to dim the background
+    document.body.classList.add('form-open');
 
     document.getElementById('addProductForm').addEventListener('submit', (e) => handleProductFormSubmit(e, product._id));
     document.querySelector('.cancel-btn').addEventListener('click', () => {
-      formContainer.remove();
-      overlay.remove(); // Remove overlay when form is closed
-      document.body.classList.remove('form-open');
+        formContainer.remove();
+        overlay.remove();
+        document.body.classList.remove('form-open');
     });
-  }
+}
+
+  
 
   // Function to handle product form submission
   async function handleProductFormSubmit(e, productId) {
     e.preventDefault();
-  
+
     const formData = new FormData();
     formData.append('name', document.getElementById('productName').value);
     formData.append('price', parseFloat(document.getElementById('productPrice').value));
     formData.append('description', document.getElementById('productDescription').value);
     formData.append('category', document.getElementById('productCategory').value);
-  
+    formData.append('quantity', parseInt(document.getElementById('productQuantity').value));  // Añadir cantidad
+
     const imageFile = document.getElementById('productImage').files[0];
     if (imageFile) {
-      formData.append('image', imageFile);
+        formData.append('image', imageFile);
     }
-  
+
     try {
-      const url = productId ? `http://localhost:3000/api/products/${productId}` : 'http://localhost:3000/api/products';
-      const method = productId ? 'PUT' : 'POST';
-  
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'x-auth-token': localStorage.getItem('token')
-        },
-        body: formData
-      });
-  
-      if (response.ok) {
-        // Display success message
-        const successMessage = document.getElementById('successMessage');
-        successMessage.textContent = productId ? 'Producto actualizado con éxito' : 'Producto agregado con éxito';
-        successMessage.classList.remove('hidden');
-        successMessage.style.display = 'block';
+        const url = productId ? `http://localhost:3000/api/products/${productId}` : 'http://localhost:3000/api/products';
+        const method = productId ? 'PUT' : 'POST';
 
-        // Hide message after 5 seconds
-        setTimeout(() => {
-          successMessage.style.display = 'none';
-        }, 5000);
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'x-auth-token': localStorage.getItem('token')
+            },
+            body: formData
+        });
 
-        // Reload products to reflect the changes
-        fetchProducts();
-        document.getElementById('productForm').remove();  // Close form
-        document.querySelector('.overlay').remove(); // Remove overlay when form is closed
-        document.body.classList.remove('form-open'); // Remove background opacity
-      } else {
-        const errorResponse = await response.json();
-        console.error('Error processing the product:', errorResponse);
-        if (errorResponse.errors && errorResponse.errors.length > 0) {
-          alert('Error processing the product: ' + errorResponse.errors[0].msg);
+        if (response.ok) {
+            // Display success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = productId ? 'Producto actualizado con éxito' : 'Producto agregado con éxito';
+            successMessage.classList.remove('hidden');
+            successMessage.style.display = 'block';
+
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+
+            // Reload products to reflect the changes
+            fetchProducts();
+            document.getElementById('productForm').remove();  // Close form
+            document.querySelector('.overlay').remove(); // Remove overlay when form is closed
+            document.body.classList.remove('form-open'); // Remove background opacity
+        } else {
+            const errorResponse = await response.json();
+            console.error('Error processing the product:', errorResponse);
+            if (errorResponse.errors && errorResponse.errors.length > 0) {
+                alert('Error processing the product: ' + errorResponse.errors[0].msg);
+            }
         }
-      }
     } catch (error) {
-      console.error('Network or other error:', error);
-      // Remove alert to prevent false error display
-      // alert('Error processing the product: ' + error.message);
+        console.error('Network or other error:', error);
     }
-  }
+}
+
 
   // Function to fetch and filter products by the authenticated user (seller)
   async function fetchProducts() {
@@ -293,10 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
     productsTableBody.innerHTML = ''; // Clear table
 
     if (products.length === 0) {
-        noProductsMessage.classList.remove('hidden'); // Show message if there are no products
+        noProductsMessage.classList.remove('hidden'); 
         noProductsMessage.style.display = 'block';
     } else {
-        noProductsMessage.classList.add('hidden'); // Hide message if there are products
+        noProductsMessage.classList.add('hidden');
         noProductsMessage.style.display = 'none';
         products.forEach(product => {
             const tr = document.createElement('tr');
@@ -310,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>$${product.price}</td>
                 <td>${product.description}</td>
                 <td>${product.category}</td>
+                <td>${product.quantity}</td>  <!-- Mostrar cantidad -->
                 <td class="table-actions">
                     <button class="edit-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Editar</button>
                     <button class="delete-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Eliminar</button>
@@ -322,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
             productsTableBody.appendChild(tr);
         });
     }
-  }
+}
 
   // Function to delete a product
   async function deleteProduct(productId) {

@@ -19,27 +19,27 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-// Ruta para añadir un producto
 router.post('/', auth, isSeller, upload.single('image'), async (req, res) => {
-  const { name, description, price, category } = req.body;
-
-  try {
-      const newProduct = new Product({
-          name,
-          price,
-          description,
-          category,
-          seller: req.user.id,  // Usar el ID del usuario autenticado como el 'seller'
-          image: req.file ? req.file.filename : null  // Guardar solo el nombre del archivo de imagen
-      });
-
-      const product = await newProduct.save();
-      res.json(product);
-  } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
-  }
-});
+    const { name, description, price, category, quantity } = req.body;
+  
+    try {
+        const newProduct = new Product({
+            name,
+            price,
+            description,
+            category,
+            seller: req.user.id,  // Usar el ID del usuario autenticado como el 'seller'
+            image: req.file ? req.file.filename : null,  // Guardar solo el nombre del archivo de imagen
+            quantity  // Añadir la cantidad al producto
+        });
+  
+        const product = await newProduct.save();
+        res.json(product);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+  });
 
 
 
@@ -69,37 +69,38 @@ router.get('/', auth, async (req, res) => {
 
 // Ruta para editar un producto
 router.put('/:id', auth, isSeller, upload.single('image'), async (req, res) => {
-  const { name, description, price, category } = req.body;
-
-  try {
-      let product = await Product.findById(req.params.id);
-
-      if (!product) {
-          return res.status(404).json({ msg: 'Producto no encontrado' });
-      }
-
-      // Verificar que el producto pertenece al vendedor que intenta editarlo
-      if (product.seller.toString() !== req.user.id) {
-          return res.status(401).json({ msg: 'No autorizado para editar este producto' });
-      }
-
-      // Actualizar los campos del producto
-      product.name = name || product.name;
-      product.description = description || product.description;
-      product.price = price || product.price;
-      product.category = category || product.category;
-
-      if (req.file) {
-          product.image = req.file.filename; // Actualizar solo el nombre del archivo de la imagen si se cargó una nueva
-      }
-
-      product = await product.save();
-      res.json(product);
-  } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
-  }
-});
+    const { name, description, price, category, quantity } = req.body;
+  
+    try {
+        let product = await Product.findById(req.params.id);
+  
+        if (!product) {
+            return res.status(404).json({ msg: 'Producto no encontrado' });
+        }
+  
+        // Verificar que el producto pertenece al vendedor que intenta editarlo
+        if (product.seller.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'No autorizado para editar este producto' });
+        }
+  
+        // Actualizar los campos del producto
+        product.name = name || product.name;
+        product.description = description || product.description;
+        product.price = price || product.price;
+        product.category = category || product.category;
+        product.quantity = quantity || product.quantity;
+  
+        if (req.file) {
+            product.image = req.file.filename; // Actualizar solo el nombre del archivo de la imagen si se cargó una nueva
+        }
+  
+        product = await product.save();
+        res.json(product);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+  });
 
 
 // Ruta para eliminar un producto
