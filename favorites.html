@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favoritos - Tienda SK</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f3f4f6;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      flex: 1;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .favorites-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    .favorites-table th, .favorites-table td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+      vertical-align: middle; 
+    }
+
+    .favorites-table th {
+      background-color: #f3f4f6;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .favorites-table td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+
+    .favorites-table td.table-actions {
+      text-align: center; /* Centrar el contenido dentro de la celda */
+    }
+
+    .table-actions button {
+      padding: 5px 10px;
+      background-color: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: inline-block; /* Asegura que los botones se mantengan en línea */
+      margin: 0 5px; /* Agrega un margen para espaciarlos */
+    }
+
+    .table-actions button:hover {
+      background-color: #2563eb;
+    }
+
+    .delete-btn {
+      background-color: #ef4444;
+    }
+
+    .delete-btn:hover {
+      background-color: #dc2626;
+    }
+
+    .no-favorites {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #555;
+      margin-top: 50px;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Responsive Hamburger Menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .hamburger span {
+      height: 3px;
+      background: white;
+      border-radius: 5px;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: #3b82f6;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+    .mobile-menu a {
+      color: white;
+      display: block;
+      padding: 10px;
+      text-decoration: none;
+      border-bottom: 1px solid #2a69ac;
+    }
+    .mobile-menu a:last-child {
+      border-bottom: none;
+    }
+    .mobile-menu a:hover {
+      background-color: #2563eb;
+    }
+
+    /* Media Query for Tablets and Phones */
+    @media (max-width: 768px) {
+      .hamburger {
+        display: flex;
+      }
+      nav {
+        display: none;
+      }
+      .mobile-menu {
+        display: none; /* Initially hidden */
+      }
+      .mobile-menu.active {
+        display: block; /* Show when active */
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Header con Nav -->
+  <header class="bg-blue-600 text-white p-4 relative">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Tinda SK</h1>
+      <div class="hamburger" id="hamburgerMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <nav id="userNav">
+        <!-- Links serán insertados aquí dinámicamente -->
+      </nav>
+    </div>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+      <!-- Links serán insertados aquí dinámicamente -->
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <div class="container">
+    <h1 style="font-weight: bold; margin-top: 15px; margin-bottom: 15px; font-size: 20px;">Mis Productos Favoritos</h1>
+    <table class="favorites-table">
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="favoritesTableBody">
+        <!-- Los productos favoritos se cargarán aquí -->
+      </tbody>
+    </table>
+
+    <p id="noFavoritesMessage" class="no-favorites">No se ha añadido ningún producto a favoritos.</p>
+  </div>
+  <footer>
+    <p>&copy; 2024 Tienda SK. Todos los derechos reservados.</p>
+  </footer>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userNav = document.getElementById('userNav');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const hamburgerMenu = document.getElementById('hamburgerMenu');
+
+      function renderMenu() {
+        if (user) {
+          userNav.innerHTML = `
+            <a href="index.html" class="px-4">Inicio</a>
+            ${user.role === 'seller' || user.role === 'buyer' ? '<a href="favorites.html" class="px-4">Favoritos</a>' : ''}
+            ${user.role === 'seller' ? '<a href="dashboard.html" class="px-4">Dashboard</a>' : ''}
+            <a href="edit-user.html" class="px-4">Editar Usuario</a>
+            <a href="#" id="logoutBtn" class="px-4">Cerrar Sesión</a>
+          `;
+          mobileMenu.innerHTML = `
+            <a href="index.html">Inicio</a>
+            ${user.role === 'seller' || user.role === 'buyer' ? '<a href="favorites.html">Favoritos</a>' : ''}
+            ${user.role === 'seller' ? '<a href="dashboard.html">Dashboard</a>' : ''}
+            <a href="edit-user.html">Editar Usuario</a>
+            <a href="#" id="logoutBtnMobile">Cerrar Sesión</a>
+          `;
+        } else {
+          userNav.innerHTML = `
+            <a href="index.html" class="px-4">Inicio</a>
+            <a href="login.html" class="px-4">Iniciar Sesión</a>
+            <a href="register.html" class="px-4">Registrarse</a>
+          `;
+          mobileMenu.innerHTML = `
+            <a href="index.html">Inicio</a>
+            <a href="login.html">Iniciar Sesión</a>
+            <a href="register.html">Registrarse</a>
+          `;
+        }
+
+        // Add event listeners for logout buttons
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', handleLogout);
+        }
+        if (logoutBtnMobile) {
+          logoutBtnMobile.addEventListener('click', handleLogout);
+        }
+      }
+
+      function handleLogout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+      }
+
+      // Toggle mobile menu visibility
+      hamburgerMenu.addEventListener('click', () => {
+        mobileMenu.classList.toggle('active');
+      });
+
+      // Initially render the menu
+      renderMenu();
+    });
+  </script>
+</body>
+</html>

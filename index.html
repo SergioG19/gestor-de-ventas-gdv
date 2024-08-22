@@ -267,35 +267,28 @@
 
       function renderMenu() {
         if (user) {
-          if (user.role === 'seller') {
-            userNav.innerHTML = `
-              <span class="px-4">Hola, ${user.name}</span>
-              <a href="dashboard.html" class="px-4">Dashboard</a>
-              <a href="edit-user.html" class="px-4">Editar Usuario</a>
-              <a href="#" id="logoutBtn" class="px-4">Cerrar Sesión</a>
-            `;
-            mobileMenu.innerHTML = `
-              <a href="dashboard.html">Dashboard</a>
-              <a href="edit-user.html">Editar Usuario</a>
-              <a href="#" id="logoutBtnMobile">Cerrar Sesión</a>
-            `;
-          } else if (user.role === 'buyer') {
-            userNav.innerHTML = `
-              <span class="px-4">Hola, ${user.name}</span>
-              <a href="edit-user.html" class="px-4">Editar Usuario</a>
-              <a href="#" id="logoutBtn" class="px-4">Cerrar Sesión</a>
-            `;
-            mobileMenu.innerHTML = `
-              <a href="edit-user.html">Editar Usuario</a>
-              <a href="#" id="logoutBtnMobile">Cerrar Sesión</a>
-            `;
-          }
+          userNav.innerHTML = `
+            <a href="index.html" class="px-4">Inicio</a>
+            ${user.role === 'seller' || user.role === 'buyer' ? '<a href="favorites.html" class="px-4">Favoritos</a>' : ''}
+            ${user.role === 'seller' ? '<a href="dashboard.html" class="px-4">Dashboard</a>' : ''}
+            <a href="edit-user.html" class="px-4">Editar Usuario</a>
+            <a href="#" id="logoutBtn" class="px-4">Cerrar Sesión</a>
+          `;
+          mobileMenu.innerHTML = `
+            <a href="index.html">Inicio</a>
+            ${user.role === 'seller' || user.role === 'buyer' ? '<a href="favorites.html">Favoritos</a>' : ''}
+            ${user.role === 'seller' ? '<a href="dashboard.html">Dashboard</a>' : ''}
+            <a href="edit-user.html">Editar Usuario</a>
+            <a href="#" id="logoutBtnMobile">Cerrar Sesión</a>
+          `;
         } else {
           userNav.innerHTML = `
+            <a href="index.html" class="px-4">Inicio</a>
             <a href="login.html" class="px-4">Iniciar Sesión</a>
             <a href="register.html" class="px-4">Registrarse</a>
           `;
           mobileMenu.innerHTML = `
+            <a href="index.html">Inicio</a>
             <a href="login.html">Iniciar Sesión</a>
             <a href="register.html">Registrarse</a>
           `;
