@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let filteredProducts = [];
   let currentPage = 1;
   const productsPerPage = 6;
+  let favoriteProducts = [];
 
   productList.style.display = 'grid';
   productList.style.gap = '20px';
@@ -19,216 +20,252 @@ document.addEventListener('DOMContentLoaded', async () => {
   productList.style.padding = '20px';
 
   const updateGridColumns = () => {
-    if (window.innerWidth >= 1024) {
-      productList.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    } else if (window.innerWidth >= 768) {
-      productList.style.gridTemplateColumns = 'repeat(2, 1fr)';
-    } else {
-      productList.style.gridTemplateColumns = 'repeat(1, 1fr)';
-    }
+      if (window.innerWidth >= 1024) {
+          productList.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      } else if (window.innerWidth >= 768) {
+          productList.style.gridTemplateColumns = 'repeat(2, 1fr)';
+      } else {
+          productList.style.gridTemplateColumns = 'repeat(1, 1fr)';
+      }
   };
   updateGridColumns();
   window.addEventListener('resize', updateGridColumns);
 
-  footer.style.position = 'relative'; 
+  footer.style.position = 'relative';
   footer.style.width = '100%';
 
   function renderProducts(productsToRender) {
-    productList.innerHTML = '';
-    if (productsToRender.length === 0) {
-      noResults.classList.remove('hidden');
-      noResults.style.display = 'block';
-    } else {
-      noResults.classList.add('hidden');
-      noResults.style.display = 'none';
+      productList.innerHTML = '';
+      if (productsToRender.length === 0) {
+          noResults.classList.remove('hidden');
+          noResults.style.display = 'block';
+      } else {
+          noResults.classList.add('hidden');
+          noResults.style.display = 'none';
 
-      const start = (currentPage - 1) * productsPerPage;
-      const end = start + productsPerPage;
-      const paginatedProducts = productsToRender.slice(start, end);
+          const start = (currentPage - 1) * productsPerPage;
+          const end = start + productsPerPage;
+          const paginatedProducts = productsToRender.slice(start, end);
 
-      paginatedProducts.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.classList.add('product-card');
+          paginatedProducts.forEach(product => {
+              const productCard = document.createElement('div');
+              productCard.classList.add('product-card');
 
-        productCard.style.width = '100%';
-        productCard.style.height = 'auto';
-        productCard.style.padding = '20px';
-        productCard.style.boxSizing = 'border-box';
-        productCard.style.border = '1px solid #ddd';
-        productCard.style.borderRadius = '10px';
-        productCard.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-        productCard.style.backgroundColor = '#fff';
+              productCard.style.width = '100%';
+              productCard.style.height = 'auto';
+              productCard.style.padding = '20px';
+              productCard.style.boxSizing = 'border-box';
+              productCard.style.border = '1px solid #ddd';
+              productCard.style.borderRadius = '10px';
+              productCard.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+              productCard.style.backgroundColor = '#fff';
 
-        const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '';
+              const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '';
 
-        productCard.innerHTML = `
-          <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; border-radius: 8px;">
-          <h2 style="font-size: 1rem; font-weight: bold; margin-bottom: 8px;">${product.name}</h2>
-          <p style="font-size: 1rem; font-weight: bold; color: #333; margin-bottom: 8px;">$${product.price}</p>
-          <p style="color: green; margin-bottom: 8px;">Envío gratis</p>
-          <p style="color: #555; margin-bottom: 8px;">${product.description}</p>
-          <p style="color: #555; margin-bottom: 8px;">Cantidad disponible: ${product.quantity}</p> <!-- Mostrar cantidad -->
-          <p style="color: #777; font-size: 0.8rem; margin-bottom: 10px;">Vendedor: ${product.seller.name}</p>
-          <button class="details-btn" style="background-color: #1d4ed8; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Ver detalles</button>
-        `;
+              productCard.innerHTML = `
+                  <img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; border-radius: 8px;">
+                  <h2 style="font-size: 1rem; font-weight: bold; margin-bottom: 8px;">${product.name}</h2>
+                  <p style="font-size: 1rem; font-weight: bold; color: #333; margin-bottom: 8px;">$${product.price}</p>
+                  <p style="color: green; margin-bottom: 8px;">Envío gratis</p>
+                  <p style="color: #555; margin-bottom: 8px;">${product.description}</p>
+                  <p style="color: #555; margin-bottom: 8px;">Cantidad disponible: ${product.quantity}</p>
+                  <p style="color: #777; font-size: 0.8rem; margin-bottom: 10px;">Vendedor: ${product.seller.name}</p>
+                  <button class="details-btn" style="background-color: #1d4ed8; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Ver detalles</button>
+              `;
 
-        productCard.querySelector('.details-btn').addEventListener('click', () => showProductDetails(product));
+              productCard.querySelector('.details-btn').addEventListener('click', () => showProductDetails(product));
 
-        productList.appendChild(productCard);
-      });
-    }
+              productList.appendChild(productCard);
+          });
+      }
   }
 
   function displayPagination(totalProducts) {
-    pageNumbers.innerHTML = '';
-    const totalPages = Math.ceil(totalProducts / productsPerPage);
-    for (let i = 1; i <= totalPages; i++) {
-      const pageNumber = document.createElement('button');
-      pageNumber.classList.add('page-number');
-      pageNumber.style.padding = '10px';
-      pageNumber.style.margin = '0 5px';
-      pageNumber.style.border = '1px solid #ddd';
-      pageNumber.style.borderRadius = '5px';
-      pageNumber.style.backgroundColor = '#f0f0f0';
-      pageNumber.style.cursor = 'pointer';
-      pageNumber.innerText = i;
-      pageNumber.addEventListener('click', () => {
-        currentPage = i;
-        renderProducts(filteredProducts);
-        updatePageNumbers();
-      });
-      pageNumbers.appendChild(pageNumber);
-    }
+      pageNumbers.innerHTML = '';
+      const totalPages = Math.ceil(totalProducts / productsPerPage);
+      for (let i = 1; i <= totalPages; i++) {
+          const pageNumber = document.createElement('button');
+          pageNumber.classList.add('page-number');
+          pageNumber.style.padding = '10px';
+          pageNumber.style.margin = '0 5px';
+          pageNumber.style.border = '1px solid #ddd';
+          pageNumber.style.borderRadius = '5px';
+          pageNumber.style.backgroundColor = '#f0f0f0';
+          pageNumber.style.cursor = 'pointer';
+          pageNumber.innerText = i;
+          pageNumber.addEventListener('click', () => {
+              currentPage = i;
+              renderProducts(filteredProducts);
+              updatePageNumbers();
+          });
+          pageNumbers.appendChild(pageNumber);
+      }
 
-    pageNumbers.style.display = 'flex';
-    pageNumbers.style.justifyContent = 'center';
-    pageNumbers.style.marginTop = '20px';
+      pageNumbers.style.display = 'flex';
+      pageNumbers.style.justifyContent = 'center';
+      pageNumbers.style.marginTop = '20px';
   }
 
   function updatePageNumbers() {
-    const pageNumberButtons = document.querySelectorAll('.page-number');
-    pageNumberButtons.forEach((button, index) => {
-      if (index + 1 === currentPage) {
-        button.style.backgroundColor = '#1d4ed8';
-        button.style.color = '#fff';
-      } else {
-        button.style.backgroundColor = '#f0f0f0';
-        button.style.color = '#000';
-      }
-    });
+      const pageNumberButtons = document.querySelectorAll('.page-number');
+      pageNumberButtons.forEach((button, index) => {
+          if (index + 1 === currentPage) {
+              button.style.backgroundColor = '#1d4ed8';
+              button.style.color = '#fff';
+          } else {
+              button.style.backgroundColor = '#f0f0f0';
+              button.style.color = '#000';
+          }
+      });
   }
 
   async function fetchAllProducts() {
-    try {
-      const response = await fetch('http://localhost:3000/api/products/all', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        products = await response.json();
-
-        filteredProducts = products;
-        renderProducts(filteredProducts);
-        displayPagination(filteredProducts.length);
-        updatePageNumbers();
-      } else {
-        console.error('Error fetching products:', response.status);
-        noResults.classList.remove('hidden');
-        noResults.style.display = 'block';
+      try {
+          const response = await fetch('http://localhost:3000/api/products/all', {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json'
+              }
+          });
+          if (response.ok) {
+              products = await response.json();
+              filteredProducts = products;
+              renderProducts(filteredProducts);
+              displayPagination(filteredProducts.length);
+              updatePageNumbers();
+          } else {
+              console.error('Error fetching products:', response.status);
+              noResults.classList.remove('hidden');
+              noResults.style.display = 'block';
+          }
+      } catch (error) {
+          console.error('Error fetching products:', error);
+          noResults.classList.remove('hidden');
+          noResults.style.display = 'block';
       }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      noResults.classList.remove('hidden');
-      noResults.style.display = 'block';
-    }
+  }
+
+  async function fetchFavorites() {
+      try {
+          const response = await fetch('http://localhost:3000/api/favorites', {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'x-auth-token': localStorage.getItem('token')
+              }
+          });
+
+          if (response.ok) {
+              favoriteProducts = await response.json();
+          } else {
+              console.error('Error fetching favorites:', response.status);
+          }
+      } catch (error) {
+          console.error('Error fetching favorites:', error);
+      }
   }
 
   function showProductDetails(product) {
-    const overlay = document.createElement('div');
-    overlay.classList.add('overlay');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    overlay.style.zIndex = '1000';
-    document.body.appendChild(overlay);
+      const overlay = document.createElement('div');
+      overlay.classList.add('overlay');
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      overlay.style.zIndex = '1000';
+      document.body.appendChild(overlay);
 
-    const popup = document.createElement('div');
-    popup.classList.add('product-popup');
-    popup.style.position = 'fixed';
-    popup.style.top = '50%';
-    popup.style.left = '50%';
-    popup.style.transform = 'translate(-50%, -50%)';
-    popup.style.backgroundColor = '#fff';
-    popup.style.padding = '20px';
-    popup.style.borderRadius = '10px';
-    popup.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-    popup.style.zIndex = '1001';
-    popup.style.width = '80%';
-    popup.style.maxWidth = '600px';
-    popup.style.boxSizing = 'border-box';
+      const popup = document.createElement('div');
+      popup.classList.add('product-popup');
+      popup.style.position = 'fixed';
+      popup.style.top = '50%';
+      popup.style.left = '50%';
+      popup.style.transform = 'translate(-50%, -50%)';
+      popup.style.backgroundColor = '#fff';
+      popup.style.padding = '20px';
+      popup.style.borderRadius = '10px';
+      popup.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+      popup.style.zIndex = '1001';
+      popup.style.width = '80%';
+      popup.style.maxWidth = '600px';
+      popup.style.boxSizing = 'border-box';
 
-    popup.innerHTML = `
-      <div style="position: relative;">
-        <button id="closePopupBtn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-        <h2 style="margin-bottom: 10px; font-size: 1.5rem; font-weight: bold;">${product.name}</h2>
-        <img src="http://localhost:3000/uploads/${product.image}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: contain; border-radius: 10px; margin-bottom: 20px;">
-        <p style="margin-bottom: 10px; color: #333;">${product.description}</p>
-        <p style="margin-bottom: 10px; font-size: 1.2rem; font-weight: bold;">Precio: $${product.price}</p>
-        <p style="margin-bottom: 20px;">Cantidad disponible: ${product.quantity}</p>
-        <input type="number" id="purchaseQuantity" value="1" min="1" max="${product.quantity}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
-        <button id="buyNowBtn" style="background-color: #16a34a; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">Comprar Inmediato</button>
-        <button id="addToFavoritesBtn" style="background-color: #4b5563; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">Añadir a Favoritos</button>
-      </div>
-    `;
+      // Aquí asociamos el ID del favorito
+      const favorite = favoriteProducts.find(fav => fav.product._id === product._id);
+      const favoriteId = favorite ? favorite._id : null;
 
-    document.body.appendChild(popup);
+      popup.innerHTML = `
+          <div style="position: relative;">
+              <button id="closePopupBtn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+              <h2 style="margin-bottom: 10px; font-size: 1.5rem; font-weight: bold;">${product.name}</h2>
+              <img src="http://localhost:3000/uploads/${product.image}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: contain; border-radius: 10px; margin-bottom: 20px;">
+              <p style="margin-bottom: 10px; color: #333;">${product.description}</p>
+              <p style="margin-bottom: 10px; font-size: 1.2rem; font-weight: bold;">Precio: $${product.price}</p>
+              <p style="margin-bottom: 20px;">Cantidad disponible: ${product.quantity}</p>
+              <input type="number" id="purchaseQuantity" value="1" min="1" max="${product.quantity}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
+              <button id="buyNowBtn" style="background-color: #16a34a; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">Comprar Inmediato</button>
+              <button id="toggleFavoriteBtn" style="background-color: ${favoriteId ? '#ef4444' : '#4b5563'}; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">${favoriteId ? 'Eliminar de Favoritos' : 'Añadir a Favoritos'}</button>
+          </div>
+      `;
 
-    document.getElementById('buyNowBtn').addEventListener('click', () => {
-      const purchaseQuantity = parseInt(document.getElementById('purchaseQuantity').value);
-      if (purchaseQuantity > 0 && purchaseQuantity <= product.quantity) {
-        buyProduct(product._id, purchaseQuantity, popup, overlay);
-      }
-    });
+      document.body.appendChild(popup);
 
-    document.getElementById('addToFavoritesBtn').addEventListener('click', () => {
-      addToFavorites(product._id);
-    });
+      document.getElementById('buyNowBtn').addEventListener('click', () => {
+          const purchaseQuantity = parseInt(document.getElementById('purchaseQuantity').value);
+          if (purchaseQuantity > 0 && purchaseQuantity <= product.quantity) {
+              buyProduct(product._id, purchaseQuantity, popup, overlay);
+          }
+      });
 
-    document.getElementById('closePopupBtn').addEventListener('click', () => {
-      popup.remove();
-      overlay.remove();
-    });
+      document.getElementById('toggleFavoriteBtn').addEventListener('click', async () => {
+    const toggleFavoriteBtn = document.getElementById('toggleFavoriteBtn');
+
+    if (toggleFavoriteBtn.dataset.favoriteId) {
+        await removeFromFavorites(toggleFavoriteBtn.dataset.favoriteId);
+        toggleFavoriteBtn.textContent = 'Añadir a Favoritos';
+        toggleFavoriteBtn.style.backgroundColor = '#4b5563';
+        delete toggleFavoriteBtn.dataset.favoriteId;
+    } else {
+        const newFavorite = await addToFavorites(product._id);
+        toggleFavoriteBtn.textContent = 'Eliminar de Favoritos';
+        toggleFavoriteBtn.style.backgroundColor = '#ef4444';
+        toggleFavoriteBtn.dataset.favoriteId = newFavorite._id;  // Actualizar el ID del favorito recién añadido
+    }
+});
+
+      document.getElementById('closePopupBtn').addEventListener('click', () => {
+          popup.remove();
+          overlay.remove();
+          fetchFavorites(); // Recargar los favoritos después de cerrar el popup
+      });
   }
 
   async function buyProduct(productId, quantity, popup, overlay) {
-    try {
-      const response = await fetch(`http://localhost:3000/api/products/buy`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': localStorage.getItem('token')
-        },
-        body: JSON.stringify({ productId, quantity })
-      });
+      try {
+          const response = await fetch(`http://localhost:3000/api/products/buy`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'x-auth-token': localStorage.getItem('token')
+              },
+              body: JSON.stringify({ productId, quantity })
+          });
 
-      if (response.ok) {
-        alert('Compra realizada con éxito.');
-        popup.remove();
-        overlay.remove();
-        fetchAllProducts();
-      } else {
-        const errorData = await response.json();
-        alert(`Error al comprar: ${errorData.message}`);
+          if (response.ok) {
+              alert('Compra realizada con éxito.');
+              popup.remove();
+              overlay.remove();
+              fetchAllProducts();
+          } else {
+              const errorData = await response.json();
+              alert(`Error al comprar: ${errorData.message}`);
+          }
+      } catch (error) {
+          console.error('Error en la compra:', error);
+          alert('Error en la compra. Por favor, intenta de nuevo.');
       }
-    } catch (error) {
-      console.error('Error en la compra:', error);
-      alert('Error en la compra. Por favor, intenta de nuevo.');
-    }
   }
 
   async function addToFavorites(productId) {
@@ -250,10 +287,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (response.ok) {
-            alert('Producto añadido a favoritos.');
+            const favorite = await response.json();
+            favoriteProducts.push(favorite);
+            return favorite;  // Devuelve el favorito recién creado para actualizar el estado
         } else {
             const errorData = await response.json();
-            alert(`Error al añadir a favoritos: ${errorData.message}`);
+            alert(`Error al añadir a favoritos: ${errorData.message || 'Error desconocido'}`);
         }
     } catch (error) {
         console.error('Error al añadir a favoritos:', error);
@@ -261,59 +300,89 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 }
 
-  if (window.location.pathname.includes('dashboard.html')) {
-    fetchSellerProducts();
-  } else {
-    fetchAllProducts();
-  }
+async function removeFromFavorites(favoriteId) {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('Tienes que iniciar sesión o registrarte para eliminar productos de tus favoritos.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/favorites/${favoriteId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            }
+        });
+
+        if (response.ok) {
+            favoriteProducts = favoriteProducts.filter(fav => fav._id !== favoriteId);
+            return true;  // Indica que se eliminó correctamente
+        } else {
+            const errorData = await response.json();
+            alert(`Error al eliminar de favoritos: ${errorData.message || 'Error desconocido'}`);
+        }
+    } catch (error) {
+        console.error('Error eliminando de favoritos:', error);
+        alert('Error eliminando de favoritos. Por favor, intenta de nuevo.');
+    }
+}
+
+
+  fetchFavorites();
+  fetchAllProducts();
 
   prevPage.addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderProducts(filteredProducts);
-      updatePageNumbers();
-    }
+      if (currentPage > 1) {
+          currentPage--;
+          renderProducts(filteredProducts);
+          updatePageNumbers();
+      }
   });
 
   nextPage.addEventListener('click', () => {
-    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderProducts(filteredProducts);
-      updatePageNumbers();
-    }
+      const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+      if (currentPage < totalPages) {
+          currentPage++;
+          renderProducts(filteredProducts);
+          updatePageNumbers();
+      }
   });
 
   filter.addEventListener('change', (e) => {
-    const filterValue = e.target.value;
-    if (filterValue === 'all') {
-      filteredProducts = products;
-    } else if (filterValue === 'price_asc') {
-      filteredProducts = [...products].sort((a, b) => a.price - b.price);
-    } else if (filterValue === 'price_desc') {
-      filteredProducts = [...products].sort((a, b) => b.price - a.price);
-    } else if (filterValue === 'category_appliances') {
-      filteredProducts = products.filter(product => product.category === 'Electrodomésticos');
-    } else if (filterValue === 'category_tech') {
-      filteredProducts = products.filter(product => product.category === 'Tecnología');
-    } else if (filterValue === 'category_supermarket') {
-      filteredProducts = products.filter(product => product.category === 'Supermercado');
-    }
-    currentPage = 1;
-    renderProducts(filteredProducts);
-    displayPagination(filteredProducts.length);
-    updatePageNumbers();
+      const filterValue = e.target.value;
+      if (filterValue === 'all') {
+          filteredProducts = products;
+      } else if (filterValue === 'price_asc') {
+          filteredProducts = [...products].sort((a, b) => a.price - b.price);
+      } else if (filterValue === 'price_desc') {
+          filteredProducts = [...products].sort((a, b) => b.price - a.price);
+      } else if (filterValue === 'category_appliances') {
+          filteredProducts = products.filter(product => product.category === 'Electrodomésticos');
+      } else if (filterValue === 'category_tech') {
+          filteredProducts = products.filter(product => product.category === 'Tecnología');
+      } else if (filterValue === 'category_supermarket') {
+          filteredProducts = products.filter(product => product.category === 'Supermercado');
+      }
+      currentPage = 1;
+      renderProducts(filteredProducts);
+      displayPagination(filteredProducts.length);
+      updatePageNumbers();
   });
 
   searchBar.addEventListener('input', (e) => {
-    const searchValue = e.target.value.toLowerCase();
-    filteredProducts = products.filter(product => product.name.toLowerCase().includes(searchValue));
-    currentPage = 1;
-    renderProducts(filteredProducts);
-    displayPagination(filteredProducts.length);
-    updatePageNumbers();
+      const searchValue = e.target.value.toLowerCase();
+      filteredProducts = products.filter(product => product.name.toLowerCase().includes(searchValue));
+      currentPage = 1;
+      renderProducts(filteredProducts);
+      displayPagination(filteredProducts.length);
+      updatePageNumbers();
   });
 });
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
@@ -482,138 +551,139 @@ document.addEventListener('DOMContentLoaded', () => {
   const favoritesTableBody = document.getElementById('favoritesTableBody');
   const noFavoritesMessage = document.getElementById('noFavoritesMessage');
 
-  // Funciones específicas para la página de favoritos
-  async function fetchFavorites() {
-    try {
-      const response = await fetch('http://localhost:3000/api/favorites', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': localStorage.getItem('token')
-        }
-      });
+  // Solo ejecuta este código si favoritesTableBody existe
+  if (favoritesTableBody) {
+      async function fetchFavorites() {
+          try {
+              const response = await fetch('http://localhost:3000/api/favorites', {
+                  method: 'GET',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'x-auth-token': localStorage.getItem('token')
+                  }
+              });
 
-      if (response.ok) {
-        const favorites = await response.json();
-        renderFavorites(favorites);
-      } else {
-        console.error('Error fetching favorites:', response.status);
-      }
-    } catch (error) {
-      console.error('Error fetching favorites:', error);
-    }
-  }
-
-  function renderFavorites(favorites) {
-    favoritesTableBody.innerHTML = '';
-
-    if (favorites.length === 0) {
-      noFavoritesMessage.classList.remove('hidden');
-      noFavoritesMessage.style.display = 'block';
-    } else {
-      noFavoritesMessage.classList.add('hidden');
-      noFavoritesMessage.style.display = 'none';
-      
-      favorites.forEach(favorite => {
-        const product = favorite.product;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><img src="http://localhost:3000/uploads/${product.image}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 5px;"></td>
-          <td>${product.name}</td>
-          <td>$${product.price}</td>
-          <td class="table-actions">
-            <button class="buy-btn">Comprar</button>
-            <button class="delete-btn">Eliminar</button>
-          </td>
-        `;
-
-        tr.querySelector('.buy-btn').addEventListener('click', () => showProductDetails(product));
-        tr.querySelector('.delete-btn').addEventListener('click', () => removeFromFavorites(favorite._id));
-
-        favoritesTableBody.appendChild(tr);
-      });
-    }
-  }
-
-  async function removeFromFavorites(productId) {
-    if (confirm('¿Seguro que deseas eliminar este producto de tus favoritos?')) {
-      try {
-        const response = await fetch(`http://localhost:3000/api/favorites/${productId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-auth-token': localStorage.getItem('token')
+              if (response.ok) {
+                  const favorites = await response.json();
+                  renderFavorites(favorites);
+              } else {
+                  console.error('Error fetching favorites:', response.status);
+              }
+          } catch (error) {
+              console.error('Error fetching favorites:', error);
           }
-        });
-
-        if (response.ok) {
-          fetchFavorites();
-        } else {
-          console.error('Error deleting favorite:', response.status);
-        }
-      } catch (error) {
-        console.error('Error deleting favorite:', error);
       }
-    }
-  }
 
+      function renderFavorites(favorites) {
+          favoritesTableBody.innerHTML = '';
 
-  // Mostrar detalles del producto en un popup
-  function showProductDetails(product) {
-    const overlay = document.createElement('div');
-    overlay.classList.add('overlay');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    overlay.style.zIndex = '1000';
-    document.body.appendChild(overlay);
+          if (favorites.length === 0) {
+              noFavoritesMessage.classList.remove('hidden');
+              noFavoritesMessage.style.display = 'block';
+          } else {
+              noFavoritesMessage.classList.add('hidden');
+              noFavoritesMessage.style.display = 'none';
 
-    const popup = document.createElement('div');
-    popup.classList.add('product-popup');
-    popup.style.position = 'fixed';
-    popup.style.top = '50%';
-    popup.style.left = '50%';
-    popup.style.transform = 'translate(-50%, -50%)';
-    popup.style.backgroundColor = '#fff';
-    popup.style.padding = '20px';
-    popup.style.borderRadius = '10px';
-    popup.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-    popup.style.zIndex = '1001';
-    popup.style.width = '80%';
-    popup.style.maxWidth = '600px';
-    popup.style.boxSizing = 'border-box';
+              favorites.forEach(favorite => {
+                  const product = favorite.product;
 
-    popup.innerHTML = `
-      <div style="position: relative;">
-        <button id="closePopupBtn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-        <h2 style="margin-bottom: 10px; font-size: 1.5rem; font-weight: bold;">${product.name}</h2>
-        <img src="http://localhost:3000/uploads/${product.image}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: contain; border-radius: 10px; margin-bottom: 20px;">
-        <p style="margin-bottom: 10px; color: #333;">${product.description}</p>
-        <p style="margin-bottom: 10px; font-size: 1.2rem; font-weight: bold;">Precio: $${product.price}</p>
-        <p style="margin-bottom: 20px;">Cantidad disponible: ${product.quantity}</p>
-        <input type="number" id="purchaseQuantity" value="1" min="1" max="${product.quantity}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
-        <button id="buyNowBtn" style="background-color: #16a34a; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">Comprar Inmediato</button>
-      </div>
-    `;
+                  const tr = document.createElement('tr');
+                  tr.innerHTML = `
+                      <td><img src="http://localhost:3000/uploads/${product.image}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 5px;"></td>
+                      <td>${product.name}</td>
+                      <td>$${product.price}</td>
+                      <td class="table-actions">
+                          <button class="buy-btn">Comprar</button>
+                          <button class="delete-btn">Eliminar</button>
+                      </td>
+                  `;
 
-    document.body.appendChild(popup);
+                  tr.querySelector('.buy-btn').addEventListener('click', () => showProductDetails(product));
+                  tr.querySelector('.delete-btn').addEventListener('click', () => removeFromFavorites(favorite._id));
 
-    document.getElementById('buyNowBtn').addEventListener('click', () => {
-      const purchaseQuantity = parseInt(document.getElementById('purchaseQuantity').value);
-      if (purchaseQuantity > 0 && purchaseQuantity <= product.quantity) {
-        buyProduct(product._id, purchaseQuantity, popup, overlay);
+                  favoritesTableBody.appendChild(tr);
+              });
+          }
       }
-    });
-    document.getElementById('closePopupBtn').addEventListener('click', () => {
-      popup.remove();
-      overlay.remove();
-    });
-  }
 
-  // Llamar a fetchFavorites para cargar los productos favoritos cuando la página de favoritos se cargue
-  fetchFavorites();
+      async function removeFromFavorites(productId) {
+          if (confirm('¿Seguro que deseas eliminar este producto de tus favoritos?')) {
+              try {
+                  const response = await fetch(`http://localhost:3000/api/favorites/${productId}`, {
+                      method: 'DELETE',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'x-auth-token': localStorage.getItem('token')
+                      }
+                  });
+
+                  if (response.ok) {
+                      fetchFavorites();
+                  } else {
+                      console.error('Error deleting favorite:', response.status);
+                  }
+              } catch (error) {
+                  console.error('Error deleting favorite:', error);
+              }
+          }
+      }
+
+      // Mostrar detalles del producto en un popup
+      function showProductDetails(product) {
+          const overlay = document.createElement('div');
+          overlay.classList.add('overlay');
+          overlay.style.position = 'fixed';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100%';
+          overlay.style.height = '100%';
+          overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+          overlay.style.zIndex = '1000';
+          document.body.appendChild(overlay);
+
+          const popup = document.createElement('div');
+          popup.classList.add('product-popup');
+          popup.style.position = 'fixed';
+          popup.style.top = '50%';
+          popup.style.left = '50%';
+          popup.style.transform = 'translate(-50%, -50%)';
+          popup.style.backgroundColor = '#fff';
+          popup.style.padding = '20px';
+          popup.style.borderRadius = '10px';
+          popup.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+          popup.style.zIndex = '1001';
+          popup.style.width = '80%';
+          popup.style.maxWidth = '600px';
+          popup.style.boxSizing = 'border-box';
+
+          popup.innerHTML = `
+              <div style="position: relative;">
+                  <button id="closePopupBtn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                  <h2 style="margin-bottom: 10px; font-size: 1.5rem; font-weight: bold;">${product.name}</h2>
+                  <img src="http://localhost:3000/uploads/${product.image}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: contain; border-radius: 10px; margin-bottom: 20px;">
+                  <p style="margin-bottom: 10px; color: #333;">${product.description}</p>
+                  <p style="margin-bottom: 10px; font-size: 1.2rem; font-weight: bold;">Precio: $${product.price}</p>
+                  <p style="margin-bottom: 20px;">Cantidad disponible: ${product.quantity}</p>
+                  <input type="number" id="purchaseQuantity" value="1" min="1" max="${product.quantity}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
+                  <button id="buyNowBtn" style="background-color: #16a34a; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">Comprar Inmediato</button>
+              </div>
+          `;
+
+          document.body.appendChild(popup);
+
+          document.getElementById('buyNowBtn').addEventListener('click', () => {
+              const purchaseQuantity = parseInt(document.getElementById('purchaseQuantity').value);
+              if (purchaseQuantity > 0 && purchaseQuantity <= product.quantity) {
+                  buyProduct(product._id, purchaseQuantity, popup, overlay);
+              }
+          });
+          document.getElementById('closePopupBtn').addEventListener('click', () => {
+              popup.remove();
+              overlay.remove();
+          });
+      }
+
+      // Llamar a fetchFavorites para cargar los productos favoritos cuando la página de favoritos se cargue
+      fetchFavorites();
+  }
 });
