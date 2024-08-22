@@ -5,6 +5,7 @@ const path = require('path');
 const auth = require('../middleware/auth');
 const { isSeller } = require('../middleware/auth');
 const Product = require('../models/Product');
+const Purchase = require('../models/purchase'); // Asegúrate de importar el modelo de Purchase
 
 // Configuración de multer para la carga de archivos
 const storage = multer.diskStorage({
@@ -39,9 +40,7 @@ router.post('/', auth, isSeller, upload.single('image'), async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server error');
     }
-  });
-
-
+});
 
 // Ruta para obtener todos los productos
 router.get('/all', async (req, res) => {
@@ -64,8 +63,6 @@ router.get('/', auth, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
-
 
 // Ruta para editar un producto
 router.put('/:id', auth, isSeller, upload.single('image'), async (req, res) => {
@@ -100,8 +97,7 @@ router.put('/:id', auth, isSeller, upload.single('image'), async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server error');
     }
-  });
-
+});
 
 // Ruta para eliminar un producto
 router.delete('/:id', auth, isSeller, async (req, res) => {
@@ -124,5 +120,42 @@ router.delete('/:id', auth, isSeller, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+// Ruta para comprar un producto
+router.post('/buy', auth, async (req, res) => {
+    try {
+        const { productId, quantity } = req.body; // Asegúrate de recibir el campo quantity del frontend
+        const buyerId = req.user.id;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ msg: 'Producto no encontrado' });
+        }
+
+        if (product.quantity < quantity) {
+            return res.status(400).json({ msg: 'Cantidad solicitada no disponible en stock' });
+        }
+
+        // Crear una nueva compra
+        const purchase = new Purchase({
+            buyer: buyerId,
+            product: productId,
+            seller: product.seller,
+            quantity, // Añadir la cantidad en la compra
+        });
+
+        // Reducir la cantidad del producto solo si la compra es exitosa
+        product.quantity -= quantity;
+        await product.save();
+
+        await purchase.save();
+
+        res.json({ msg: 'Compra realizada con éxito' });
+    } catch (err) {
+        console.error('Error en la compra:', err.message);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+});
+
 
 module.exports = router;

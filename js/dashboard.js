@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const secondaryMenu = document.getElementById('secondaryMenu');
   const closeSidebar = document.getElementById('closeSidebar');
   const backToTop = document.getElementById('backToTop');
+  let currentPage = 1;
 
   if (!user) {
     window.location.href = 'login.html';
@@ -83,8 +84,31 @@ document.addEventListener('DOMContentLoaded', () => {
           <p id="totalBuyers">Cargando...</p>
         </div>
       </div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-4" style="margin-top: 24px;">Historial de Ventas</h2>
+      <div class="table-container">
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Comprador</th>
+              <th>Email</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody id="salesTableBody">
+            <!-- Productos vendidos se cargarán aquí -->
+          </tbody>
+        </table>
+        <div id="paginationControls" class="pagination-controls">
+          <!-- Controles de paginación -->
+        </div>
+      </div>
     `;
+
     fetchStats();
+    fetchSales(); // Cargar las ventas cuando se cargue el contenido general
   }
 
   // Function to fetch statistics of the authenticated seller
@@ -110,40 +134,139 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Function to load Inventory Content
-  function loadInventarioContent() {
+  // Function to fetch and render sales
+  async function fetchSales(page = 1) {
+    try {
+      const response = await fetch(`http://localhost:3000/api/sales?page=${page}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': localStorage.getItem('token')
+        }
+      });
+
+      if (response.ok) {
+        const salesData = await response.json();
+        renderSales(salesData.sales, salesData.totalPages, page);
+      } else {
+        console.error('Error fetching sales:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching sales:', error);
+    }
+  }
+
+  // Función para renderizar las ventas en la tabla
+  function renderSales(sales, totalPages, currentPage) {
+    const salesTableBody = document.getElementById('salesTableBody');
+    salesTableBody.innerHTML = '';
+
+    sales.forEach(sale => {
+        const tr = document.createElement('tr');
+        const imageUrl = sale.product.image ? `http://localhost:3000/uploads/${sale.product.image}` : '/images/no-image.png';
+
+        tr.innerHTML = `
+            <td><img src="${imageUrl}" alt="${sale.product.name}" style="width: 50px; height: 50px; object-fit: contain;"></td>
+            <td>${sale.product.name}</td>
+            <td>$${sale.product.price}</td>
+            <td>${sale.buyer.name}</td>
+            <td>${sale.buyer.email}</td>
+            <td>${sale.quantity}</td>
+        `;
+        salesTableBody.appendChild(tr);
+    });
+
+    renderPaginationControls(totalPages, currentPage);
+}
+
+// Función para renderizar los controles de paginación
+// Función para renderizar los controles de paginación
+function renderPaginationControls(totalPages, currentPage) {
+  const paginationControls = document.getElementById('paginationControls');
+  paginationControls.innerHTML = '';
+  paginationControls.style.display = 'flex';
+  paginationControls.style.justifyContent = 'center';
+  paginationControls.style.marginTop = '20px';
+
+  const createButton = (text, disabled, onClick) => {
+      const button = document.createElement('button');
+      button.textContent = text;
+      button.classList.add('page-button');
+      button.disabled = disabled;
+      button.style.padding = '10px 15px';
+      button.style.margin = '0 5px';
+      button.style.border = '1px solid #ddd';
+      button.style.borderRadius = '5px';
+      button.style.backgroundColor = disabled ? '#f0f0f0' : '#1d4ed8';
+      button.style.color = disabled ? '#999' : '#fff';
+      button.style.cursor = disabled ? 'not-allowed' : 'pointer';
+      button.addEventListener('click', onClick);
+      return button;
+  };
+
+  // Botón Anterior
+  const prevButton = createButton('Anterior', currentPage === 1, () => {
+      if (currentPage > 1) {
+          fetchSales(currentPage - 1);
+      }
+  });
+  paginationControls.appendChild(prevButton);
+
+  // Botones de página
+  for (let i = 1; i <= totalPages; i++) {
+      const button = createButton(i, false, () => fetchSales(i));
+      if (i === currentPage) {
+          button.style.backgroundColor = '#3b82f6';
+          button.style.color = '#ffffff';
+      }
+      paginationControls.appendChild(button);
+  }
+
+  // Botón Siguiente
+  const nextButton = createButton('Siguiente', currentPage === totalPages, () => {
+      if (currentPage < totalPages) {
+          fetchSales(currentPage + 1);
+      }
+  });
+  paginationControls.appendChild(nextButton);
+}
+
+
+// Función para cargar el contenido del inventario
+function loadInventarioContent() {
     dashboardContent.innerHTML = `
-      <h2 class="text-2xl font-bold text-gray-800 mb-4" style="margin-top: 24px;">Inventario de Productos</h2>
-      <button id="addProductBtn" class="hover:bg-green-600 text-black px-4 py-2 rounded mb-4" style="background-color: #00b4d8; margin-top: 24px;">Agregar Producto</button>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4" style="margin-top: 24px;">Inventario de Productos</h2>
+        <button id="addProductBtn" class="hover:bg-green-600 text-black px-4 py-2 rounded mb-4" style="background-color: #00b4d8; margin-top: 24px;">Agregar Producto</button>
 
-      <div id="successMessage" class="text-green-500 font-bold mb-4 hidden" style="margin-top:24px;"></div>
+        <div id="successMessage" class="text-green-500 font-bold mb-4 hidden" style="margin-top:24px;"></div>
 
-      <div class="table-container">
-        <table class="responsive-table">
-          <thead>
-            <tr>
-              <th>Imagen</th>
-              <th>Nombre</th>
-              <th>Precio</th>
-              <th>Descripción</th>
-              <th>Categoría</th>
-              <th>Cantidad</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="productsTableBody">
-            <!-- Productos se cargarán aquí -->
-          </tbody>
-        </table>
-      </div>
-      <p id="noProductsMessage" class="text-gray-600 mt-4 hidden">Todavía no se ha agregado ningún producto.</p>
+        <div class="table-container">
+            <table class="responsive-table">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Descripción</th>
+                        <th>Categoría</th>
+                        <th>Cantidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <!-- Productos se cargarán aquí -->
+                </tbody>
+            </table>
+        </div>
+        <p id="noProductsMessage" class="text-gray-600 mt-4 hidden">Todavía no se ha agregado ningún producto.</p>
     `;
-    fetchProducts(); // Load products of the authenticated seller from the database
+    fetchProducts(); // Cargar los productos del vendedor autenticado desde la base de datos
 
     document.getElementById('addProductBtn').addEventListener('click', () => {
-      showProductForm();
+        showProductForm();
     });
-  }
+}
+
 
   // Function to show the product form
   function showProductForm(product = {}) {
@@ -210,9 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.remove();
         document.body.classList.remove('form-open');
     });
-}
-
-  
+  }
 
   // Function to handle product form submission
   async function handleProductFormSubmit(e, productId) {
@@ -231,46 +352,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-        const url = productId ? `http://localhost:3000/api/products/${productId}` : 'http://localhost:3000/api/products';
-        const method = productId ? 'PUT' : 'POST';
+      const url = productId ? `http://localhost:3000/api/products/${productId}` : 'http://localhost:3000/api/products';
+      const method = productId ? 'PUT' : 'POST';
 
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'x-auth-token': localStorage.getItem('token')
-            },
-            body: formData
-        });
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'x-auth-token': localStorage.getItem('token')
+        },
+        body: formData
+      });
 
-        if (response.ok) {
-            // Display success message
-            const successMessage = document.getElementById('successMessage');
-            successMessage.textContent = productId ? 'Producto actualizado con éxito' : 'Producto agregado con éxito';
-            successMessage.classList.remove('hidden');
-            successMessage.style.display = 'block';
+      if (response.ok) {
+        // Display success message
+        const successMessage = document.getElementById('successMessage');
+        successMessage.textContent = productId ? 'Producto actualizado con éxito' : 'Producto agregado con éxito';
+        successMessage.classList.remove('hidden');
+        successMessage.style.display = 'block';
 
-            // Hide message after 5 seconds
-            setTimeout(() => {
-                successMessage.style.display = 'none';
-            }, 5000);
+        // Hide message after 5 seconds
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 5000);
 
-            // Reload products to reflect the changes
-            fetchProducts();
-            document.getElementById('productForm').remove();  // Close form
-            document.querySelector('.overlay').remove(); // Remove overlay when form is closed
-            document.body.classList.remove('form-open'); // Remove background opacity
-        } else {
-            const errorResponse = await response.json();
-            console.error('Error processing the product:', errorResponse);
-            if (errorResponse.errors && errorResponse.errors.length > 0) {
-                alert('Error processing the product: ' + errorResponse.errors[0].msg);
-            }
+        // Reload products to reflect the changes
+        fetchProducts();
+        document.getElementById('productForm').remove();  // Close form
+        document.querySelector('.overlay').remove(); // Remove overlay when form is closed
+        document.body.classList.remove('form-open'); // Remove background opacity
+      } else {
+        const errorResponse = await response.json();
+        console.error('Error processing the product:', errorResponse);
+        if (errorResponse.errors && errorResponse.errors.length > 0) {
+          alert('Error processing the product: ' + errorResponse.errors[0].msg);
         }
+      }
     } catch (error) {
-        console.error('Network or other error:', error);
+      console.error('Network or other error:', error);
     }
-}
-
+  }
 
   // Function to fetch and filter products by the authenticated user (seller)
   async function fetchProducts() {
@@ -300,37 +420,37 @@ document.addEventListener('DOMContentLoaded', () => {
     productsTableBody.innerHTML = ''; // Clear table
 
     if (products.length === 0) {
-        noProductsMessage.classList.remove('hidden'); 
-        noProductsMessage.style.display = 'block';
+      noProductsMessage.classList.remove('hidden'); 
+      noProductsMessage.style.display = 'block';
     } else {
-        noProductsMessage.classList.add('hidden');
-        noProductsMessage.style.display = 'none';
-        products.forEach(product => {
-            const tr = document.createElement('tr');
+      noProductsMessage.classList.add('hidden');
+      noProductsMessage.style.display = 'none';
+      products.forEach(product => {
+        const tr = document.createElement('tr');
 
-            // Ensure the image path is correctly formed
-            const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '/images/no-image.png';
+        // Ensure the image path is correctly formed
+        const imageUrl = product.image ? `http://localhost:3000/uploads/${product.image}` : '/images/no-image.png';
 
-            tr.innerHTML = `
-                <td><img src="${imageUrl}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: contain;"></td>
-                <td>${product.name}</td>
-                <td>$${product.price}</td>
-                <td>${product.description}</td>
-                <td>${product.category}</td>
-                <td>${product.quantity}</td>  <!-- Mostrar cantidad -->
-                <td class="table-actions">
-                    <button class="edit-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Editar</button>
-                    <button class="delete-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Eliminar</button>
-                </td>
-            `;
+        tr.innerHTML = `
+          <td><img src="${imageUrl}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: contain;"></td>
+          <td>${product.name}</td>
+          <td>$${product.price}</td>
+          <td>${product.description}</td>
+          <td>${product.category}</td>
+          <td>${product.quantity}</td>  <!-- Mostrar cantidad -->
+          <td class="table-actions">
+            <button class="edit-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Editar</button>
+            <button class="delete-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Eliminar</button>
+          </td>
+        `;
 
-            tr.querySelector('.edit-btn').addEventListener('click', () => showProductForm(product));
-            tr.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product._id));
+        tr.querySelector('.edit-btn').addEventListener('click', () => showProductForm(product));
+        tr.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product._id));
 
-            productsTableBody.appendChild(tr);
-        });
+        productsTableBody.appendChild(tr);
+      });
     }
-}
+  }
 
   // Function to delete a product
   async function deleteProduct(productId) {
