@@ -166,81 +166,87 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function showProductDetails(product) {
-      const overlay = document.createElement('div');
-      overlay.classList.add('overlay');
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100%';
-      overlay.style.height = '100%';
-      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-      overlay.style.zIndex = '1000';
-      document.body.appendChild(overlay);
+    const overlay = document.createElement('div');
+    overlay.classList.add('overlay');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.zIndex = '1000';
+    document.body.appendChild(overlay);
 
-      const popup = document.createElement('div');
-      popup.classList.add('product-popup');
-      popup.style.position = 'fixed';
-      popup.style.top = '50%';
-      popup.style.left = '50%';
-      popup.style.transform = 'translate(-50%, -50%)';
-      popup.style.backgroundColor = '#fff';
-      popup.style.padding = '20px';
-      popup.style.borderRadius = '10px';
-      popup.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-      popup.style.zIndex = '1001';
-      popup.style.width = '80%';
-      popup.style.maxWidth = '600px';
-      popup.style.boxSizing = 'border-box';
+    const popup = document.createElement('div');
+    popup.classList.add('product-popup');
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.backgroundColor = '#fff';
+    popup.style.padding = '20px';
+    popup.style.borderRadius = '10px';
+    popup.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+    popup.style.zIndex = '1001';
+    popup.style.width = '80%';
+    popup.style.maxWidth = '600px';
+    popup.style.boxSizing = 'border-box';
 
-      // Aquí asociamos el ID del favorito
-      const favorite = favoriteProducts.find(fav => fav.product._id === product._id);
-      const favoriteId = favorite ? favorite._id : null;
+    // Verificar si el producto está en favoritos cada vez que se abre el popup
+    const favorite = favoriteProducts.find(fav => fav.product._id === product._id);
+    const favoriteId = favorite ? favorite._id : null;
 
-      popup.innerHTML = `
-          <div style="position: relative;">
-              <button id="closePopupBtn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-              <h2 style="margin-bottom: 10px; font-size: 1.5rem; font-weight: bold;">${product.name}</h2>
-              <img src="http://localhost:3000/uploads/${product.image}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: contain; border-radius: 10px; margin-bottom: 20px;">
-              <p style="margin-bottom: 10px; color: #333;">${product.description}</p>
-              <p style="margin-bottom: 10px; font-size: 1.2rem; font-weight: bold;">Precio: $${product.price}</p>
-              <p style="margin-bottom: 20px;">Cantidad disponible: ${product.quantity}</p>
-              <input type="number" id="purchaseQuantity" value="1" min="1" max="${product.quantity}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
-              <button id="buyNowBtn" style="background-color: #16a34a; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">Comprar Inmediato</button>
-              <button id="toggleFavoriteBtn" style="background-color: ${favoriteId ? '#ef4444' : '#4b5563'}; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">${favoriteId ? 'Eliminar de Favoritos' : 'Añadir a Favoritos'}</button>
-          </div>
-      `;
+    popup.innerHTML = `
+        <div style="position: relative;">
+            <button id="closePopupBtn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <h2 style="margin-bottom: 10px; font-size: 1.5rem; font-weight: bold;">${product.name}</h2>
+            <img src="http://localhost:3000/uploads/${product.image}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: contain; border-radius: 10px; margin-bottom: 20px;">
+            <p style="margin-bottom: 10px; color: #333;">${product.description}</p>
+            <p style="margin-bottom: 10px; font-size: 1.2rem; font-weight: bold;">Precio: $${product.price}</p>
+            <p style="margin-bottom: 20px;">Cantidad disponible: ${product.quantity}</p>
+            <input type="number" id="purchaseQuantity" value="1" min="1" max="${product.quantity}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px;">
+            <button id="buyNowBtn" style="background-color: #16a34a; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;">Comprar Inmediato</button>
+            <button id="toggleFavoriteBtn" style="background-color: ${favoriteId ? '#ef4444' : '#4b5563'}; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px;" data-favorite-id="${favoriteId || ''}">${favoriteId ? 'Eliminar de Favoritos' : 'Añadir a Favoritos'}</button>
+        </div>
+    `;
 
-      document.body.appendChild(popup);
+    document.body.appendChild(popup);
 
-      document.getElementById('buyNowBtn').addEventListener('click', () => {
-          const purchaseQuantity = parseInt(document.getElementById('purchaseQuantity').value);
-          if (purchaseQuantity > 0 && purchaseQuantity <= product.quantity) {
-              buyProduct(product._id, purchaseQuantity, popup, overlay);
-          }
-      });
+    // Actualizar los event listeners para los botones
+    document.getElementById('buyNowBtn').addEventListener('click', () => {
+        const purchaseQuantity = parseInt(document.getElementById('purchaseQuantity').value);
+        if (purchaseQuantity > 0 && purchaseQuantity <= product.quantity) {
+            buyProduct(product._id, purchaseQuantity, popup, overlay);
+        }
+    });
 
-      document.getElementById('toggleFavoriteBtn').addEventListener('click', async () => {
-    const toggleFavoriteBtn = document.getElementById('toggleFavoriteBtn');
+    document.getElementById('toggleFavoriteBtn').addEventListener('click', async () => {
+        const toggleFavoriteBtn = document.getElementById('toggleFavoriteBtn');
+        const currentFavoriteId = toggleFavoriteBtn.dataset.favoriteId;
 
-    if (toggleFavoriteBtn.dataset.favoriteId) {
-        await removeFromFavorites(toggleFavoriteBtn.dataset.favoriteId);
-        toggleFavoriteBtn.textContent = 'Añadir a Favoritos';
-        toggleFavoriteBtn.style.backgroundColor = '#4b5563';
-        delete toggleFavoriteBtn.dataset.favoriteId;
-    } else {
-        const newFavorite = await addToFavorites(product._id);
-        toggleFavoriteBtn.textContent = 'Eliminar de Favoritos';
-        toggleFavoriteBtn.style.backgroundColor = '#ef4444';
-        toggleFavoriteBtn.dataset.favoriteId = newFavorite._id;  // Actualizar el ID del favorito recién añadido
-    }
-});
+        if (currentFavoriteId) {
+            const success = await removeFromFavorites(currentFavoriteId);
+            if (success) {
+                toggleFavoriteBtn.textContent = 'Añadir a Favoritos';
+                toggleFavoriteBtn.style.backgroundColor = '#4b5563';
+                toggleFavoriteBtn.removeAttribute('data-favorite-id');
+            }
+        } else {
+            const newFavorite = await addToFavorites(product._id);
+            if (newFavorite) {
+                toggleFavoriteBtn.textContent = 'Eliminar de Favoritos';
+                toggleFavoriteBtn.style.backgroundColor = '#ef4444';
+                toggleFavoriteBtn.dataset.favoriteId = newFavorite._id;  // Actualizar el ID del favorito recién añadido
+            }
+        }
+    });
 
-      document.getElementById('closePopupBtn').addEventListener('click', () => {
-          popup.remove();
-          overlay.remove();
-          fetchFavorites(); // Recargar los favoritos después de cerrar el popup
-      });
-  }
+    document.getElementById('closePopupBtn').addEventListener('click', () => {
+        popup.remove();
+        overlay.remove();
+        fetchFavorites(); // Recargar los favoritos después de cerrar el popup
+    });
+}
 
   async function buyProduct(productId, quantity, popup, overlay) {
       try {
@@ -267,13 +273,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           alert('Error en la compra. Por favor, intenta de nuevo.');
       }
   }
-
+  
   async function addToFavorites(productId) {
     const token = localStorage.getItem('token');
 
     if (!token) {
         alert('Tienes que iniciar sesión o registrarte para tener tu lista de productos favoritos.');
-        return;
+        return null;
     }
 
     try {
@@ -289,6 +295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (response.ok) {
             const favorite = await response.json();
             favoriteProducts.push(favorite);
+            alert('Se ha agregado el producto a favoritos correctamente.');
             return favorite;  // Devuelve el favorito recién creado para actualizar el estado
         } else {
             const errorData = await response.json();
@@ -298,6 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error al añadir a favoritos:', error);
         alert('Error al añadir a favoritos. Por favor, intenta de nuevo.');
     }
+    return null;
 }
 
 async function removeFromFavorites(favoriteId) {
@@ -305,7 +313,7 @@ async function removeFromFavorites(favoriteId) {
 
     if (!token) {
         alert('Tienes que iniciar sesión o registrarte para eliminar productos de tus favoritos.');
-        return;
+        return false;
     }
 
     try {
@@ -319,6 +327,7 @@ async function removeFromFavorites(favoriteId) {
 
         if (response.ok) {
             favoriteProducts = favoriteProducts.filter(fav => fav._id !== favoriteId);
+            alert('Se ha eliminado el producto de favoritos correctamente.');
             return true;  // Indica que se eliminó correctamente
         } else {
             const errorData = await response.json();
@@ -328,6 +337,7 @@ async function removeFromFavorites(favoriteId) {
         console.error('Error eliminando de favoritos:', error);
         alert('Error eliminando de favoritos. Por favor, intenta de nuevo.');
     }
+    return false;
 }
 
 
