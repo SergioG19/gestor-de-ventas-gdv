@@ -506,3 +506,170 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchFavorites();
     }
 });
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const editUserForm = document.getElementById('editUserForm');
+    const userNav = document.getElementById('userNav');
+  
+    // Función para manejar el inicio de sesión
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = loginForm.email.value;
+      const password = loginForm.password.value;
+  
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'index.html';
+        } else {
+          alert('Credenciales incorrectas. Por favor, intenta de nuevo.');
+        }
+      } catch (error) {
+        console.error('Error en el inicio de sesión:', error);
+        alert('Error en el inicio de sesión. Por favor, intenta de nuevo.');
+      }
+    }
+  
+    // Función para manejar el registro
+  async function handleRegister(event) {
+    event.preventDefault();
+    const name = registerForm.name.value;
+    const email = registerForm.email.value;
+    const password = registerForm.password.value;
+    const role = registerForm.role.value;
+  
+    // Verificación de formato de correo electrónico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Este correo no tiene el formato adecuado. ¿Intentamos de nuevo?');
+      return;
+    }
+  
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, password, role })
+      });
+  
+      if (response.ok) {
+        alert('Registro exitoso. Por favor, inicia sesión.');
+        window.location.href = 'login.html';
+      } else {
+        alert('Error en el registro. Por favor, intenta de nuevo.');
+      }
+    } catch (error) {
+      console.error('Error en el registro:', error);
+      alert('Error en el registro. Por favor, intenta de nuevo.');
+    }
+  }
+  
+  
+    // Función para manejar la edición de usuario
+    async function handleEditUser(event) {
+      event.preventDefault();
+      const name = editUserForm.name.value;
+      const email = editUserForm.email.value;
+      const password = editUserForm.password.value;
+      const role = editUserForm.role.value;
+      const user = JSON.parse(localStorage.getItem('user'));
+  
+      if (confirm('¿Seguro que quieres realizar estos cambios?')) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/auth/update/${user._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-auth-token': localStorage.getItem('token')
+            },
+            body: JSON.stringify({ name, email, password, role })
+          });
+  
+          if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('user', JSON.stringify(data.user));
+            window.location.href = 'index.html';
+          } else {
+            alert('Error al actualizar. Por favor, intenta de nuevo.');
+          }
+        } catch (error) {
+          console.error('Error al actualizar:', error);
+          alert('Error al actualizar. Por favor, intenta de nuevo.');
+        }
+      }
+    }
+  
+    // Función para cerrar sesión
+    function handleLogout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+  
+    // Función para mostrar opciones del usuario autenticado
+    function showUserOptions() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        if (user.role === 'seller') {
+          userNav.innerHTML = `
+            <span class="px-4">Hola, ${user.name}</span>
+            <a href="dashboard.html" class="px-4">Dashboard</a>
+            <a href="favorites.html" class="px-4">Favoritos</a>
+            <a href="edit-user.html" class="px-4">Editar Usuario</a>
+            <a href="#" id="logoutBtn" class="px-4">Cerrar Sesión</a>
+          `;
+        } else {
+          userNav.innerHTML = `
+            <span class="px-4">Hola, ${user.name}</span>
+            <a href="favorites.html" class="px-4">Favoritos</a>
+            <a href="edit-user.html" class="px-4">Editar Usuario</a>
+            <a href="#" id="logoutBtn" class="px-4">Cerrar Sesión</a>
+          `;
+        }
+  
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn.addEventListener('click', handleLogout);
+      } else {
+        userNav.innerHTML = `
+          <a href="login.html" class="px-4">Iniciar Sesión</a>
+          <a href="register.html" class="px-4">Registrarse</a>
+        `;
+      }
+    }
+  
+    if (loginForm) {
+      loginForm.addEventListener('submit', handleLogin);
+    }
+  
+    if (registerForm) {
+      registerForm.addEventListener('submit', handleRegister);
+    }
+  
+    if (editUserForm) {
+      const user = JSON.parse(localStorage.getItem('user'));
+      editUserForm.name.value = user.name;
+      editUserForm.email.value = user.email;
+      editUserForm.role.value = user.role;
+      editUserForm.addEventListener('submit', handleEditUser);
+    }
+  
+    showUserOptions();
+  });
+
+
